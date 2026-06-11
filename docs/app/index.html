@@ -565,6 +565,7 @@
 "use strict";
 /* ===================== ACCOUNT & STORAGE ===================== */
 const META="nutriboard.meta";        // holds account + google client id
+const DEFAULT_GOOGLE_CLIENT_ID="1088958164885-9g76hoibmqsfrdhsfa8loo3j517orgc8.apps.googleusercontent.com";
 let META_DB=loadMeta();
 function loadMeta(){try{return JSON.parse(localStorage.getItem(META))||{}}catch(e){return {}}}
 function saveMeta(){localStorage.setItem(META,JSON.stringify(META_DB));}
@@ -781,7 +782,7 @@ function renderAccount(){
 function initials(s){return s.split(/[\s@.]/).filter(Boolean).slice(0,2).map(x=>x[0].toUpperCase()).join("");}
 function renderGoogle(){
   const el=document.getElementById("gbtn");if(!el)return;
-  const cid=META_DB.googleClientId;
+  const cid=META_DB.googleClientId||DEFAULT_GOOGLE_CLIENT_ID;
   if(!cid){el.innerHTML=`<button class="btn ghost sm" id="setupG">🔑 Set up Google Sign-In</button>`;
     document.getElementById("setupG").onclick=()=>{
       const id=prompt("Paste your Google OAuth Client ID.\n\n(Create one free at console.cloud.google.com → Credentials → OAuth client ID → Web. This page must be hosted over https or run on localhost for Google sign-in to work.)");
