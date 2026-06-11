@@ -2,12 +2,20 @@
 
 A full-stack **nutrition coach & habit tracker**. Set a goal, log meals/water/weight/habits, get goal-aware targets (Mifflin-St Jeor), meal suggestions tailored to your remaining macros, an adaptive hydration goal, a built-in (or AI-powered) nutritionist chat, and a timestamped audit trail of every change.
 
+## ▶️ Live demo
+
+**Instant-use board (no install, runs entirely in your browser):**
+👉 **https://ayoub-bhy.github.io/nutriboard/**
+
+This is the self-contained client-side tracker — it saves your data privately in your browser via `localStorage`, so nothing is uploaded. The full-stack version below (with accounts and a shared database) is what you run locally or deploy.
+
 ## Architecture
 
 ```
 nutriboard/
-├── backend/      Express + TypeScript REST API, Prisma ORM, JWT auth, Zod validation, Vitest
+├── backend/      Express + TypeScript REST API, Prisma ORM, JWT auth, Zod validation
 ├── frontend/     React + Vite + TypeScript SPA (typed API client, auth context)
+├── docs/         Static client-side demo served on GitHub Pages
 ├── docker-compose.yml   PostgreSQL 16
 └── .github/workflows/ci.yml   CI: typecheck + tests + build
 ```
@@ -20,7 +28,7 @@ nutriboard/
 | Auth | JWT (bcrypt-hashed passwords) | Stateless, standard |
 | ORM/DB | Prisma + PostgreSQL | Type-safe queries, migrations |
 | Domain logic | Pure `utils/nutrition.ts` | Unit-tested, framework-free |
-| Tests/CI | Vitest, GitHub Actions | Math + build verified on every push |
+| Tests/CI | Node built-in test runner, GitHub Actions | Zero-dependency tests; math + build verified on every push |
 
 ## Quick start
 
