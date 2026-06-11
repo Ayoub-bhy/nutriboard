@@ -271,6 +271,18 @@
   .wbadge.on{background:#fff;color:#3c6b3a;opacity:1;box-shadow:0 4px 10px -4px rgba(0,0,0,.25)}
   .wins-msg{font-size:13.5px;font-weight:600;opacity:.96}
   @media(max-width:600px){.wins{padding:18px;gap:16px}.ws-num{font-size:36px}.wins-mid{min-width:100%}}
+  /* ---------- Connected Devices ---------- */
+  .devgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+  @media(max-width:600px){.devgrid{grid-template-columns:1fr}}
+  .devcard{background:var(--panel-2);border:1px solid var(--line);border-radius:16px;padding:14px;transition:.16s}
+  .devcard.on{border-color:var(--accent);background:linear-gradient(160deg,rgba(92,138,87,.10),rgba(156,190,90,.07))}
+  .devcard:hover{box-shadow:var(--shadow-soft);transform:translateY(-2px)}
+  .dvtop{display:flex;align-items:center;gap:11px;margin-bottom:9px}
+  .dvic{font-size:26px}
+  .dvname{font-weight:800;font-size:14px}
+  .dvmethod{font-size:11px;color:var(--muted);font-weight:700}
+  .dvbadge{margin-left:auto;font-size:10.5px;font-weight:800;color:var(--accent);background:rgba(92,138,87,.12);border:1px solid rgba(92,138,87,.25);padding:3px 9px;border-radius:999px}
+  .dvsyncs{font-size:11.5px;color:var(--muted);font-weight:600;margin-bottom:11px;line-height:1.5}
 </style>
 </head>
 <body>
@@ -289,6 +301,7 @@
     <div class="tab" data-v="meals">🍳 Suggested Meals</div>
     <div class="tab" data-v="profile">👤 Profile &amp; Routine</div>
     <div class="tab" data-v="insights">💡 Insights &amp; Advice</div>
+    <div class="tab" data-v="devices">⌚ Devices</div>
   </div>
 
   <!-- ============ TODAY ============ -->
@@ -497,6 +510,34 @@
     </div>
   </div>
 
+  <div class="view" id="v-devices">
+    <div class="grid">
+      <section class="card col-7">
+        <h2>⌚ Connected Devices <span class="r">sync activity to sharpen your targets</span></h2>
+        <p class="hint" style="margin-top:0">Connect a wearable or health platform and NutriBoard pulls in your steps, active calories, sleep and heart rate — then adjusts your daily budget so you can eat back what you burn.</p>
+        <div class="devgrid" id="deviceGrid"></div>
+        <p class="hint">Live sync uses each provider's OAuth API (Fitbit, Garmin, Oura, Whoop, Strava, Withings) or Google Health Connect; Apple Watch syncs through Apple Health. A unified API such as Terra or the open-source Open Wearables can connect 500+ devices at once — enabled on the hosted version.</p>
+      </section>
+      <section class="card col-5">
+        <h2>🔥 Today's Activity</h2>
+        <div class="row c2">
+          <div><label>👟 Steps</label><input id="aSteps" type="number" min="0" placeholder="0"></div>
+          <div><label>🔥 Active kcal</label><input id="aKcal" type="number" min="0" placeholder="0"></div>
+        </div>
+        <div class="row c2" style="margin-top:12px">
+          <div><label>😴 Sleep (h)</label><input id="aSleep" type="number" step="0.1" min="0" placeholder="0"></div>
+          <div><label>❤️ Resting HR</label><input id="aHr" type="number" min="0" placeholder="0"></div>
+        </div>
+        <button class="btn" id="saveActivity" style="margin-top:14px">Save activity</button>
+        <div class="habit" style="margin-top:14px;padding:8px 0" id="eatBackRow">
+          <div class="chk" id="eatBackChk">✓</div>
+          <div class="nm">Add active calories to my daily goal</div>
+        </div>
+        <div class="motiv" id="activityMotiv"></div>
+      </section>
+    </div>
+  </div>
+
   <p class="hint" style="text-align:center;margin-top:24px">
     Targets use the Mifflin-St Jeor equation — educational estimates, not medical advice. Data is saved privately in this browser per signed-in account.
   </p>
@@ -525,6 +566,7 @@ function freshDB(){return{
   habitDefs:["8h sleep","10k steps","5 veg servings","No late-night snacking","Protein at every meal"],
   history:[], chat:[], coach:{lastHash:"",prefsLearned:[]},
   water:{base:0,target:0,streak:0,lastEval:""},
+  devices:{}, eatBack:true,
   days:{}
 };}
 function loadData(){try{const d=JSON.parse(localStorage.getItem(dataKey()));if(d&&d.profile)return migrate(d);}catch(e){}
@@ -533,7 +575,7 @@ function loadData(){try{const d=JSON.parse(localStorage.getItem(dataKey()));if(d
   return freshDB();}
 function migrate(d){const f=freshDB();return Object.assign(f,d,{profile:Object.assign(f.profile,d.profile),coach:Object.assign(f.coach,d.coach||{}),water:Object.assign(f.water,d.water||{})});}
 function save(){localStorage.setItem(dataKey(),JSON.stringify(DB));}
-function day(d=curDate){if(!DB.days[d])DB.days[d]={meals:[],water:0,habits:{},weight:null,weightTs:null,checkins:{}};return DB.days[d];}
+function day(d=curDate){if(!DB.days[d])DB.days[d]={meals:[],water:0,habits:{},weight:null,weightTs:null,checkins:{}};var _d=DB.days[d];if(!_d.activity)_d.activity={steps:0,activeKcal:0,sleepH:0,restingHR:0};return _d;}
 
 /* audit: record any change with timestamp */
 function recordChange(field,from,to){
@@ -753,10 +795,11 @@ function renderGoals(){
 function renderTargets(){const c=calc();kBmr.textContent=c.bmr;kTdee.textContent=c.tdee;kTarget.textContent=c.target;return c;}
 function renderEnergy(c){
   const d=day(),t=dayTotals(d);
-  calEaten.textContent=Math.round(t.cal);calGoal.textContent=c.target;
-  const rem=c.target-t.cal;calRem.textContent=rem>=0?rem+" left":Math.abs(rem)+" over";
+  const eff=effTarget(c);
+  calEaten.textContent=Math.round(t.cal);calGoal.textContent=eff;
+  const rem=eff-t.cal;calRem.textContent=rem>=0?rem+" left":Math.abs(rem)+" over";
   calRem.style.color=rem>=0?"var(--accent)":"var(--bad)";
-  ringFg.setAttribute("stroke-dashoffset",452-452*Math.min(1,t.cal/c.target||0));
+  ringFg.setAttribute("stroke-dashoffset",452-452*Math.min(1,t.cal/eff||0));
   const set=(nv,gv,bar,nid,gid)=>{document.getElementById(nid).textContent=Math.round(nv);document.getElementById(gid).textContent=gv;document.getElementById(bar).style.width=Math.min(100,nv/gv*100||0)+"%";};
   set(t.pro,c.proG,"pBar","pNow","pGoal");set(t.carb,c.carbG,"cBar","cNow","cGoal");set(t.fat,c.fatG,"fBar","fNow","fGoal");
   mealCount.textContent=d.meals.length;
@@ -928,12 +971,13 @@ async function sendChat(){
 }
 
 function winData(){
-  const c=calc(),d=day(),t=dayTotals(d),wt=(DB.water.target||waterTarget());
+  const c=calc(),d=day(),t=dayTotals(d),wt=(DB.water.target||waterTarget()),eff=effTarget(c),a=d.activity||{};
   return [
     {k:"Logged",ic:"🍽️",ok:d.meals.length>0},
     {k:"Protein",ic:"💪",ok:t.pro>=c.proG*0.9},
-    {k:"Calories",ic:"🔥",ok:t.cal>0&&t.cal<=c.target*1.05},
+    {k:"Calories",ic:"🔥",ok:t.cal>0&&t.cal<=eff*1.05},
     {k:"Water",ic:"💧",ok:wt>0&&d.water>=wt},
+    {k:"Active",ic:"🏃",ok:(+a.steps||0)>=8000||(+a.activeKcal||0)>0},
     {k:"Habits",ic:"✅",ok:DB.habitDefs.length>0&&DB.habitDefs.every(n=>d.habits[n])}
   ];
 }
@@ -949,10 +993,42 @@ function renderWins(){const el=document.getElementById("wins");if(!el)return;
   wins.forEach(w=>{const b=document.createElement("span");b.className="wbadge"+(w.ok?" on":"");b.textContent=w.ic+" "+w.k;bb.appendChild(b);});
   document.getElementById("wsMsg").textContent=pct>=100?"Perfect day — you crushed every goal! 🏆":pct>=60?"You're winning today — keep the momentum going.":pct>=20?"Good start — a couple more wins within reach.":"Every log is a win. Add your first to get rolling.";
 }
+const DEVICES=[
+  {id:"apple",name:"Apple Watch · Health",ic:"⌚",method:"via Apple Health (iOS)",syncs:"Steps · Active kcal · Heart rate · Sleep · Workouts"},
+  {id:"health_connect",name:"Google · Health Connect",ic:"🤖",method:"On-device / REST (Android)",syncs:"Steps · Active kcal · Heart rate · Sleep"},
+  {id:"fitbit",name:"Fitbit",ic:"⌚",method:"OAuth REST API",syncs:"Steps · Active kcal · Heart rate · Sleep"},
+  {id:"garmin",name:"Garmin",ic:"⌚",method:"OAuth + webhooks",syncs:"Steps · Active kcal · HR · Sleep · Workouts"},
+  {id:"samsung",name:"Samsung Galaxy Watch",ic:"⌚",method:"Samsung Health (Android)",syncs:"Steps · Active kcal · HR · Sleep"},
+  {id:"whoop",name:"Whoop",ic:"💪",method:"OAuth REST API (beta)",syncs:"Strain · Recovery · HR · Sleep"},
+  {id:"oura",name:"Oura Ring",ic:"💍",method:"OAuth REST API",syncs:"Readiness · Sleep · HR · Activity"},
+  {id:"strava",name:"Strava",ic:"🏃",method:"OAuth REST API",syncs:"Workouts · Active kcal · Distance"},
+  {id:"withings",name:"Withings",ic:"⚖️",method:"OAuth REST API",syncs:"Body weight · Body fat · Heart rate"}
+];
+function effTarget(c){var a=day().activity;return c.target+((DB.eatBack&&a)?(+a.activeKcal||0):0);}
+function renderDevices(){
+  const grid=document.getElementById("deviceGrid");if(!grid)return;
+  grid.innerHTML="";
+  DEVICES.forEach(dv=>{
+    const on=!!(DB.devices&&DB.devices[dv.id]);
+    const el=document.createElement("div");el.className="devcard"+(on?" on":"");
+    el.innerHTML='<div class="dvtop"><span class="dvic">'+dv.ic+'</span><div><div class="dvname">'+dv.name+'</div><div class="dvmethod">'+dv.method+'</div></div>'+(on?'<span class="dvbadge">Connected</span>':'')+'</div><div class="dvsyncs">Syncs: '+dv.syncs+'</div><button class="btn '+(on?'ghost ':'')+'sm">'+(on?'Disconnect':'Connect')+'</button>';
+    el.querySelector("button").onclick=()=>{DB.devices=DB.devices||{};if(on){delete DB.devices[dv.id];}else{DB.devices[dv.id]={at:now()};recordChange("Device connected","",dv.name);}save();renderDevices();toast(on?dv.name+" disconnected":dv.name+" connected ✓");};
+    grid.appendChild(el);
+  });
+  const a=day().activity;
+  aSteps.value=a.steps||"";aKcal.value=a.activeKcal||"";aSleep.value=a.sleepH||"";aHr.value=a.restingHR||"";
+  document.getElementById("eatBackChk").className="chk"+(DB.eatBack?" on":"");
+  document.getElementById("eatBackChk").onclick=()=>{DB.eatBack=!DB.eatBack;save();renderAll();};
+  document.getElementById("saveActivity").onclick=()=>{const ac=day().activity;const old=ac.activeKcal;ac.steps=+aSteps.value||0;ac.activeKcal=+aKcal.value||0;ac.sleepH=+aSleep.value||0;ac.restingHR=+aHr.value||0;recordChange("Active kcal",old,ac.activeKcal);save();renderAll();toast("Activity saved ✓");};
+  const c=calc(),eff=effTarget(c),conn=DB.devices&&Object.keys(DB.devices).length;
+  document.getElementById("activityMotiv").innerHTML=(+a.activeKcal>0&&DB.eatBack)
+    ?'\ud83d\udd25 You burned <b>'+a.activeKcal+'</b> active kcal — today\'s budget is now <b>'+eff+'</b> kcal (base '+c.target+' + '+a.activeKcal+').'
+    :conn?'Connected. Log or sync today\'s activity to adjust your budget.':'Connect a device above, or enter today\'s activity manually — both feed your tracking.';
+}
 function renderAll(){
   renderDate();renderGoals();renderTargets();
   const c=calc();renderEnergy(c);renderMeals();renderWater();renderHabits();renderWeight();renderCheckins();renderWins();
-  renderProfile();renderMealsTab();renderInsights();renderCoachTab();
+  renderProfile();renderMealsTab();renderInsights();renderCoachTab();renderDevices();
 }
 
 /* ===================== HELPERS ===================== */
