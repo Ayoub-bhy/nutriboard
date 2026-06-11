@@ -253,6 +253,24 @@
     .msg{max-width:90%}
   }
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+  /* ---------- Today's Wins (everyday-winning loop) ---------- */
+  .wins{display:flex;align-items:center;gap:24px;flex-wrap:wrap;
+    background:linear-gradient(135deg,#5c8a57,#9cbe5a);color:#fff;border-radius:var(--radius);
+    padding:22px 26px;margin-bottom:20px;box-shadow:0 18px 38px -18px rgba(92,138,87,.65);position:relative;overflow:hidden}
+  .wins::after{content:"";position:absolute;right:-40px;top:-40px;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.10)}
+  .wins::before{content:"";position:absolute;left:-30px;bottom:-50px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.07)}
+  .wins-score{text-align:center;flex-shrink:0;position:relative;z-index:1}
+  .ws-num{font-family:var(--font-display);font-size:46px;font-weight:600;line-height:1}
+  .ws-lbl{font-size:11px;opacity:.92;font-weight:800;text-transform:uppercase;letter-spacing:.6px;margin-top:2px}
+  .wins-mid{flex:1;min-width:250px;position:relative;z-index:1}
+  .wins-streak{font-weight:800;font-size:15.5px;margin-bottom:9px}
+  .wins-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+  .wbadge{font-size:12px;font-weight:800;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.18);
+    border:1px solid rgba(255,255,255,.28);opacity:.65;transition:.25s}
+  .wbadge.on{background:#fff;color:#3c6b3a;opacity:1;box-shadow:0 4px 10px -4px rgba(0,0,0,.25)}
+  .wins-msg{font-size:13.5px;font-weight:600;opacity:.96}
+  @media(max-width:600px){.wins{padding:18px;gap:16px}.ws-num{font-size:36px}.wins-mid{min-width:100%}}
 </style>
 </head>
 <body>
@@ -281,6 +299,14 @@
         <div class="d" id="dateLabel">Today</div>
         <button id="nextDay">›</button>
         <button id="todayBtn" style="width:auto;padding:0 10px;font-size:12px">Today</button>
+      </div>
+    </div>
+        <div class="wins" id="wins">
+      <div class="wins-score"><div class="ws-num" id="wsPct">0%</div><div class="ws-lbl">today's goals</div></div>
+      <div class="wins-mid">
+        <div class="wins-streak" id="wsStreak"></div>
+        <div class="wins-badges" id="wsBadges"></div>
+        <div class="wins-msg" id="wsMsg"></div>
       </div>
     </div>
     <div class="grid">
@@ -760,7 +786,7 @@ function renderWater(){
   if(pct>=100)msg=`✅ Goal smashed! ${DB.water.streak>=5?"You've been so consistent I bumped your target up — keep leveling up.":"Stay consistent and I'll raise your target to push you further."}`;
   else if(pct>=60)msg=`💪 ${pct}% there — ${tgt-d.water}ml to go. You've got this.`;
   else msg=`💧 ${pct}% of today's goal. Small sips add up — set a glass by your desk.`;
-  document.getElementById("waterMotiv").textContent=msg;
+  document.getElementById("waterMotiv").textContent=msg;renderWins();
 }
 function renderHabits(){
   const d=day(),list=document.getElementById("habitList");list.innerHTML="";
@@ -768,7 +794,7 @@ function renderHabits(){
   DB.habitDefs.forEach((name,idx)=>{const done=!!d.habits[name];const el=document.createElement("div");
     el.className="habit"+(done?" done":"");
     el.innerHTML=`<div class="chk${done?" on":""}">✓</div><div class="nm">${esc(name)}</div><button class="x" data-i="${idx}">remove</button>`;
-    const toggle=()=>{d.habits[name]=!done;save();renderHabits();};
+    const toggle=()=>{d.habits[name]=!done;save();renderHabits();renderWins();};
     el.querySelector(".chk").onclick=toggle;el.querySelector(".nm").onclick=toggle;
     el.querySelector(".x").onclick=()=>{DB.habitDefs.splice(idx,1);save();renderHabits();};
     list.appendChild(el);});
@@ -901,9 +927,31 @@ async function sendChat(){
   DB.coach.lastHash=hashData();save();renderAll();
 }
 
+function winData(){
+  const c=calc(),d=day(),t=dayTotals(d),wt=(DB.water.target||waterTarget());
+  return [
+    {k:"Logged",ic:"🍽️",ok:d.meals.length>0},
+    {k:"Protein",ic:"💪",ok:t.pro>=c.proG*0.9},
+    {k:"Calories",ic:"🔥",ok:t.cal>0&&t.cal<=c.target*1.05},
+    {k:"Water",ic:"💧",ok:wt>0&&d.water>=wt},
+    {k:"Habits",ic:"✅",ok:DB.habitDefs.length>0&&DB.habitDefs.every(n=>d.habits[n])}
+  ];
+}
+function logStreak(){let s=0;const dt=new Date(curDate+"T00:00");
+  for(let i=0;i<400;i++){const k=dt.toISOString().slice(0,10);const dd=DB.days[k];
+    if(dd&&dd.meals&&dd.meals.length){s++;dt.setDate(dt.getDate()-1);}else break;}return s;}
+function renderWins(){const el=document.getElementById("wins");if(!el)return;
+  const wins=winData(),met=wins.filter(w=>w.ok).length,pct=Math.round(met/wins.length*100);
+  document.getElementById("wsPct").textContent=pct+"%";
+  const s=logStreak();
+  document.getElementById("wsStreak").textContent=s>0?("🔥 "+s+"-day logging streak"):"🌱 Log a meal to start your streak";
+  const bb=document.getElementById("wsBadges");bb.innerHTML="";
+  wins.forEach(w=>{const b=document.createElement("span");b.className="wbadge"+(w.ok?" on":"");b.textContent=w.ic+" "+w.k;bb.appendChild(b);});
+  document.getElementById("wsMsg").textContent=pct>=100?"Perfect day — you crushed every goal! 🏆":pct>=60?"You're winning today — keep the momentum going.":pct>=20?"Good start — a couple more wins within reach.":"Every log is a win. Add your first to get rolling.";
+}
 function renderAll(){
   renderDate();renderGoals();renderTargets();
-  const c=calc();renderEnergy(c);renderMeals();renderWater();renderHabits();renderWeight();renderCheckins();
+  const c=calc();renderEnergy(c);renderMeals();renderWater();renderHabits();renderWeight();renderCheckins();renderWins();
   renderProfile();renderMealsTab();renderInsights();renderCoachTab();
 }
 
