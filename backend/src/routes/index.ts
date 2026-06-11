@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as c from '../controllers/index.js';
 import { requireAuth } from '../middleware/auth.js';
 import { asyncHandler as h } from '../utils/http.js';
+import phase1 from './phase1.routes.js';
 
 const router = Router();
 
@@ -38,5 +39,8 @@ router.get('/coach', h(c.coachHistory));
 router.post('/coach', h(c.coachChat));
 
 router.get('/history', h(c.listChanges));
+
+// Phase 1: onboarding, streaks, food search
+router.use(phase1);
 
 export default router;
