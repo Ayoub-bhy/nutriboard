@@ -12,6 +12,7 @@ export interface Profile {
   wakeTime: string; sleepTime: string; breakfastTime: string; lunchTime: string; dinnerTime: string;
   trainingDays: string; routineNotes: string;
   waterBaseMl: number; waterTargetMl: number; waterStreak: number;
+  onboardingCompleted: boolean;
   targets: Targets;
 }
 
@@ -24,3 +25,7 @@ export interface Suggestion { n: string; cal: number; p: number; c: number; f: n
 export interface SuggestionResult { remCal: number; remPro: number; diet: string; suggestions: Suggestion[]; }
 export interface ChatMessage { id?: string; role: 'user' | 'coach'; text: string; createdAt?: string; }
 export interface Change { id: string; field: string; fromValue: string; toValue: string; createdAt: string; }
+
+export interface FoodResult { name: string; brand: string; barcode: string; serving: string; calories: number; protein: number; carbs: number; fat: number; densityClass: 'green' | 'yellow' | 'red'; }
+export interface WeeklyDay { date: string; calories: number; protein: number; water: number; logged: boolean; }
+export interface OnboardingInput { sex: Sex; age: number; weightKg: number; heightCm: number; activity: number; goal: Goal; dietType?: string; }

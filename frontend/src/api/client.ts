@@ -1,6 +1,7 @@
 import type {
   User, Profile, Meal, Water, Weight, Habit, HabitLog,
   SuggestionResult, ChatMessage, Change, MealType,
+  Targets, OnboardingInput, WeeklyDay, FoodResult,
 } from './types';
 
 const BASE = import.meta.env.VITE_API_BASE ?? '/api';
@@ -54,4 +55,11 @@ export const api = {
   sendCoach: (date: string, text: string) => req<{ text: string; mode: 'ai' | 'rule' }>(`/coach?date=${date}`, { method: 'POST', body: JSON.stringify({ text }) }),
 
   listChanges: () => req<Change[]>('/history'),
+
+  // Phase 1
+  completeOnboarding: (d: OnboardingInput) => req<{ profile: Profile; targets: Targets }>('/onboarding', { method: 'POST', body: JSON.stringify(d) }),
+  getStreaks: () => req<{ logStreak: number; daysLogged: number }>('/stats/streaks'),
+  getWeekly: () => req<{ days: WeeklyDay[]; targets: Targets }>('/stats/weekly'),
+  searchFood: (q: string) => req<{ query: string; foods: FoodResult[] }>(`/foods/search?q=${encodeURIComponent(q)}`),
+  foodByBarcode: (code: string) => req<{ food: FoodResult }>(`/foods/barcode/${code}`),
 };
