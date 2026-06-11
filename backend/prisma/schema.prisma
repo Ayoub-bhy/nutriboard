@@ -74,6 +74,7 @@ model Profile {
   waterTargetMl Int     @default(0)
   waterStreak   Int     @default(0)
   waterLastEval String  @default("")
+  onboardingCompleted Boolean @default(false)
 
   updatedAt     DateTime @updatedAt
 }
