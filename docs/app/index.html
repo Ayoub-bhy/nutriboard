@@ -271,6 +271,13 @@
   .wbadge.on{background:#fff;color:#3c6b3a;opacity:1;box-shadow:0 4px 10px -4px rgba(0,0,0,.25)}
   .wins-msg{font-size:13.5px;font-weight:600;opacity:.96}
   @media(max-width:600px){.wins{padding:18px;gap:16px}.ws-num{font-size:36px}.wins-mid{min-width:100%}}
+  /* ---------- Device sensors ---------- */
+  .sensgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:6px}
+  @media(max-width:700px){.sensgrid{grid-template-columns:1fr}}
+  .senscard{background:var(--panel-2);border:1px solid var(--line);border-radius:16px;padding:16px;text-align:center}
+  .senscard .st{font-weight:800;font-size:14px;margin-bottom:6px}
+  .senscard .sv{font-family:var(--display);font-size:26px;font-weight:600;color:var(--accent);margin-bottom:4px}
+  .senscard .sd{font-size:11.5px;color:var(--muted);font-weight:600;margin-bottom:12px}
   /* ---------- Connected Devices ---------- */
   .devgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
   @media(max-width:600px){.devgrid{grid-template-columns:1fr}}
@@ -534,6 +541,15 @@
           <div class="nm">Add active calories to my daily goal</div>
         </div>
         <div class="motiv" id="activityMotiv"></div>
+      </section>
+      <section class="card col-12">
+        <h2>📲 This device's sensors <span class="r">live data from your phone or laptop — no account needed</span></h2>
+        <div class="sensgrid">
+          <div class="senscard"><div class="st">❤️ Heart rate</div><div class="sv" id="hrVal">—</div><div class="sd">Pair a Bluetooth HR strap or watch</div><button class="btn sm" id="btHR">Pair via Bluetooth</button></div>
+          <div class="senscard"><div class="st">👟 Step counter</div><div class="sv" id="stepVal">—</div><div class="sd">Uses the motion sensor (best on phone)</div><button class="btn sm" id="btSteps">Start counting</button></div>
+          <div class="senscard"><div class="st">🚶 Walk tracker</div><div class="sv" id="gpsVal">—</div><div class="sd">GPS distance → active calories</div><button class="btn sm" id="btGps">Start walk</button></div>
+        </div>
+        <p class="hint" id="sensNote">Bluetooth &amp; motion need a secure (https) page and your permission. Live readings flow straight into Today's Activity and adjust your budget.</p>
       </section>
     </div>
   </div>
@@ -1005,8 +1021,54 @@ const DEVICES=[
   {id:"withings",name:"Withings",ic:"⚖️",method:"OAuth REST API",syncs:"Body weight · Body fat · Heart rate"}
 ];
 function effTarget(c){var a=day().activity;return c.target+((DB.eatBack&&a)?(+a.activeKcal||0):0);}
+function setSens(id,t){var e=document.getElementById(id);if(e)e.textContent=t;}
+function sensMsg(t){setSens("sensNote",t);}
+async function pairHR(){
+  if(!navigator.bluetooth){sensMsg("Web Bluetooth isn't available here — use Chrome/Edge on desktop or Android, over https.");return;}
+  try{
+    const dev=await navigator.bluetooth.requestDevice({filters:[{services:["heart_rate"]}]});
+    const srv=await dev.gatt.connect();
+    const s=await srv.getPrimaryService("heart_rate");
+    const ch=await s.getCharacteristic("heart_rate_measurement");
+    await ch.startNotifications();
+    ch.addEventListener("characteristicvaluechanged",ev=>{
+      const v=ev.target.value,flags=v.getUint8(0),hr=(flags&1)?v.getUint16(1,true):v.getUint8(1);
+      setSens("hrVal",hr+" bpm");var i=document.getElementById("aHr");if(i)i.value=hr;day().activity.restingHR=hr;save();
+    });
+    dev.addEventListener("gattserverdisconnected",()=>setSens("hrVal","— (disconnected)"));
+    document.getElementById("btHR").textContent="Paired ✓";toast("Heart-rate monitor paired ✓");
+  }catch(e){sensMsg("Pairing cancelled or no device found.");}
+}
+var _stp={on:false,count:0,base:0,last:0};
+function onMotion(e){var a=e.accelerationIncludingGravity||e.acceleration;if(!a)return;
+  var mag=Math.sqrt((a.x||0)*(a.x||0)+(a.y||0)*(a.y||0)+(a.z||0)*(a.z||0)),now=Date.now();
+  if(mag>12&&now-_stp.last>300){_stp.last=now;_stp.count++;day().activity.steps=_stp.base+_stp.count;save();
+    setSens("stepVal",day().activity.steps+" steps");var i=document.getElementById("aSteps");if(i)i.value=day().activity.steps;}}
+async function startSteps(){
+  if(_stp.on){window.removeEventListener("devicemotion",onMotion);_stp.on=false;document.getElementById("btSteps").textContent="Start counting";renderAll();return;}
+  if(typeof DeviceMotionEvent==="undefined"){sensMsg("Motion sensor not available on this device.");return;}
+  if(typeof DeviceMotionEvent.requestPermission==="function"){try{var pm=await DeviceMotionEvent.requestPermission();if(pm!=="granted"){sensMsg("Motion permission denied.");return;}}catch(e){}}
+  _stp.base=+day().activity.steps||0;_stp.count=0;_stp.on=true;window.addEventListener("devicemotion",onMotion);
+  document.getElementById("btSteps").textContent="Counting… (tap to stop)";sensMsg("Walk with your phone to count steps. They feed your daily activity.");
+}
+var _gps={on:false,watch:null,last:null,dist:0};
+function haversine(la1,lo1,la2,lo2){var R=6371000,r=function(x){return x*Math.PI/180;},dLa=r(la2-la1),dLo=r(lo2-lo1),a=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(r(la1))*Math.cos(r(la2))*Math.sin(dLo/2)*Math.sin(dLo/2);return 2*R*Math.asin(Math.sqrt(a));}
+function startWalk(){
+  if(!navigator.geolocation){sensMsg("Geolocation not available.");return;}
+  if(_gps.on){navigator.geolocation.clearWatch(_gps.watch);_gps.on=false;document.getElementById("btGps").textContent="Start walk";renderAll();return;}
+  _gps={on:true,watch:null,last:null,dist:0};document.getElementById("btGps").textContent="Tracking… (tap to stop)";
+  _gps.watch=navigator.geolocation.watchPosition(function(pos){
+    var la=pos.coords.latitude,lo=pos.coords.longitude;
+    if(_gps.last)_gps.dist+=haversine(_gps.last.la,_gps.last.lo,la,lo);
+    _gps.last={la:la,lo:lo};
+    var km=_gps.dist/1000,kcal=Math.round((+DB.profile.weight||70)*km*0.9);
+    day().activity.activeKcal=kcal;save();
+    setSens("gpsVal",km.toFixed(2)+" km · "+kcal+" kcal");var i=document.getElementById("aKcal");if(i)i.value=kcal;
+  },function(err){sensMsg("Location error: "+err.message);},{enableHighAccuracy:true,maximumAge:0});
+}
 function renderDevices(){
   const grid=document.getElementById("deviceGrid");if(!grid)return;
+  if(!window._sensBound){window._sensBound=1;var b1=document.getElementById("btHR"),b2=document.getElementById("btSteps"),b3=document.getElementById("btGps");if(b1)b1.onclick=pairHR;if(b2)b2.onclick=startSteps;if(b3)b3.onclick=startWalk;}
   grid.innerHTML="";
   DEVICES.forEach(dv=>{
     const on=!!(DB.devices&&DB.devices[dv.id]);
