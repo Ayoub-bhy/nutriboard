@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: nutriboard_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-nutriboard}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nutriboard}
+      POSTGRES_DB: ${POSTGRES_DB:-nutriboard}
+    ports:
+      - "5432:5432"
+    volumes:
+      - nutriboard_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nutriboard}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  nutriboard_pgdata:

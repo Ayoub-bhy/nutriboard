@@ -1,0 +1,17 @@
+{
+  "name": "nutriboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NutriBoard — full-stack nutrition coach & habit tracker (Express + Prisma + Postgres + React)",
+  "workspaces": ["backend", "frontend"],
+  "scripts": {
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "dev:backend": "npm --workspace backend run dev",
+    "dev:frontend": "npm --workspace frontend run dev",
+    "test": "npm --workspace backend run test",
+    "typecheck": "npm --workspace backend run typecheck && npm --workspace frontend run typecheck",
+    "build": "npm --workspace backend run build && npm --workspace frontend run build"
+  },
+  "engines": { "node": ">=18" }
+}
