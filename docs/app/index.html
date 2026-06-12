@@ -200,6 +200,9 @@
   .sugcard .nm{font-weight:800;font-size:14.5px}
   .sugcard .meta{color:var(--muted);font-size:11.5px;margin:4px 0 10px;font-weight:700}
   .sugcard .comp{font-size:11.5px;color:var(--accent);font-weight:700;margin-bottom:9px;line-height:1.45}
+  .finfo{position:relative;cursor:help;color:var(--muted);font-weight:800;margin-left:3px}
+  .fpop{display:none;position:absolute;bottom:150%;left:0;width:250px;background:var(--text);color:#fff;padding:10px 12px;border-radius:10px;font-size:11px;font-weight:600;line-height:1.55;box-shadow:var(--shadow);z-index:40}
+  .finfo:hover .fpop{display:block}
   .sugcard .mac{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px}
   .sugcard .mac span{font-size:11px;background:#fff;border:1px solid var(--line);padding:3px 9px;border-radius:999px;font-weight:700}
   .tip{padding:14px 16px;border-left:4px solid var(--accent-2);background:var(--panel-2);border-radius:0 12px 12px 0;margin-bottom:12px;font-size:13.5px;font-weight:600}
@@ -648,23 +651,24 @@ function last7(){const a=[];for(let i=6;i>=0;i--){const d=new Date(curDate);d.se
 
 /* ===================== MEAL SUGGESTION ENGINE ===================== */
 const CIQUAL={
-  // key: [display name, kcal, protein, carb, fat] per 100 g — ANSES-CIQUAL (cooked/prepared)
-  yogurt:["Greek yogurt, plain",60,10,3.6,0.4], berries:["mixed berries",57,0.7,12,0.3], honey:["honey",304,0.3,82,0],
-  egg:["egg, cooked",155,13,1.1,11], greens:["mixed leaf salad",17,1.4,2.5,0.3], oats:["oat porridge, cooked",71,2.5,12,1.5],
-  whey:["whey protein powder",373,80,8,6], banana:["banana",93,1.1,20,0.3], tofu:["tofu, cooked",120,12,1.5,7],
-  avocado:["avocado",169,1.8,3,15], chicken:["chicken breast, cooked",163,31,0,3.6], rice:["white rice, cooked",130,2.8,28,0.4],
-  brownrice:["brown rice, cooked",118,2.6,23,0.9], broccoli:["broccoli, cooked",35,2.4,4,0.5], salmon:["salmon, cooked",206,22,0,13],
-  quinoa:["quinoa, cooked",120,4.4,21,1.9], lentils:["lentils, cooked",116,9,17,0.4], chickpeas:["chickpeas, cooked",139,8,22,2],
-  turkey:["turkey breast, cooked",135,30,0,1], hummus:["hummus",177,8,14,10], beef:["lean beef, cooked",217,27,0,12],
-  cod:["cod, cooked",105,23,0,1], potato:["potato, boiled",87,2,20,0.1], sweetpotato:["sweet potato, cooked",90,1.6,20,0.1],
-  tempeh:["tempeh, cooked",190,20,8,11], cottage:["cottage cheese",98,11,3.4,4.3], pineapple:["pineapple",50,0.5,13,0.1],
-  apple:["apple",54,0.3,14,0.2], peanutbutter:["peanut butter",588,25,12,50], almonds:["almonds",579,21,9,50],
-  edamame:["edamame, cooked",121,12,9,5], cucumber:["cucumber",15,0.7,3,0.1]
+  // key:[name, kcal, protein, carb, fat, yield]  per 100 g — ANSES-CIQUAL (cooked/prepared); yield = cooked weight ÷ raw weight
+  yogurt:["Greek yogurt, plain",60,10,3.6,0.4,1], berries:["mixed berries",57,0.7,12,0.3,1], honey:["honey",304,0.3,82,0,1],
+  egg:["egg, cooked",155,13,1.1,11,1], greens:["mixed leaf salad",17,1.4,2.5,0.3,1], oats:["oat porridge, cooked",71,2.5,12,1.5,5],
+  whey:["whey protein powder",373,80,8,6,1], banana:["banana",93,1.1,20,0.3,1], tofu:["tofu, cooked",120,12,1.5,7,1],
+  avocado:["avocado",169,1.8,3,15,1], chicken:["chicken breast, cooked",163,31,0,3.6,0.75], rice:["white rice, cooked",130,2.8,28,0.4,2.7],
+  brownrice:["brown rice, cooked",118,2.6,23,0.9,2.6], broccoli:["broccoli, cooked",35,2.4,4,0.5,0.9], salmon:["salmon, cooked",206,22,0,13,0.8],
+  quinoa:["quinoa, cooked",120,4.4,21,1.9,2.7], lentils:["lentils, cooked",116,9,17,0.4,2.4], chickpeas:["chickpeas, cooked",139,8,22,2,2.4],
+  turkey:["turkey breast, cooked",135,30,0,1,0.75], hummus:["hummus",177,8,14,10,1], beef:["lean beef, cooked",217,27,0,12,0.75],
+  cod:["cod, cooked",105,23,0,1,0.8], potato:["potato, boiled",87,2,20,0.1,1], sweetpotato:["sweet potato, cooked",90,1.6,20,0.1,1],
+  tempeh:["tempeh, cooked",190,20,8,11,1], cottage:["cottage cheese",98,11,3.4,4.3,1], pineapple:["pineapple",50,0.5,13,0.1,1],
+  apple:["apple",54,0.3,14,0.2,1], peanutbutter:["peanut butter",588,25,12,50,1], almonds:["almonds",579,21,9,50,1],
+  edamame:["edamame, cooked",121,12,9,5,1], cucumber:["cucumber",15,0.7,3,0.1,1]
 };
 function mkMeal(n,type,tags,comp){
-  let cal=0,p=0,c=0,f=0;const parts=[];
-  comp.forEach(([k,g])=>{const a=CIQUAL[k],r=g/100;cal+=a[1]*r;p+=a[2]*r;c+=a[3]*r;f+=a[4]*r;parts.push(g+" g "+a[0]);});
-  return {n,type,tags,cal:Math.round(cal),p:Math.round(p),c:Math.round(c),f:Math.round(f),comp:parts.join(" + ")};
+  let cal=0,p=0,c=0,f=0;const cooked=[],fresh=[];
+  comp.forEach(([k,g])=>{const a=CIQUAL[k],r=g/100;cal+=a[1]*r;p+=a[2]*r;c+=a[3]*r;f+=a[4]*r;
+    cooked.push(g+" g "+a[0]);const raw=Math.round(g/(a[5]||1));fresh.push("~"+raw+" g "+a[0].replace(/, (cooked|boiled)$/,"")+(a[5]!==1?" (raw)":""));});
+  return {n,type,tags,cal:Math.round(cal),p:Math.round(p),c:Math.round(c),f:Math.round(f),comp:cooked.join(" + "),fresh:fresh.join(" + ")};
 }
 const FOODS=[
   mkMeal("Greek yogurt, berries & honey","Breakfast",["vegetarian","mediterranean"],[["yogurt",170],["berries",80],["honey",15]]),
@@ -761,7 +765,7 @@ function coachReply(text){
   // intents
   if(low.includes("water")||low.includes("hydrat")){const d=day();return `You're at ${d.water}/${DB.water.target}ml. ${d.water>=DB.water.target?"Goal hit — nice. Your streak is "+DB.water.streak+" day(s). I'll nudge the target up as you stay consistent.":"Add "+Math.max(0,DB.water.target-d.water)+"ml more to hit today's goal."}`;}
   if(low.includes("protein")){const t=dayTotals(),c=calc();return `Protein: ${Math.round(t.pro)}/${c.proG}g. ${t.pro>=c.proG?"Target met 💪":"Aim for "+Math.round((c.proG-t.pro))+"g more — e.g. 100 g cooked chicken breast ≈ 31 g, 150 g cooked lentils ≈ 14 g, 30 g whey ≈ 24 g (Ciqual)."}`;}
-  if(low.includes("suggest")||low.includes("what should i eat")||low.includes("meal")){const sg=suggestMeals();const top=sg.list.slice(0,2).map(m=>`${m.n} — ${m.comp} (cooked) ≈ ${m.cal} kcal, ${m.p}g protein`).join("  •  ");return `With ~${sg.remCal} kcal and ${sg.remPro}g protein left, here are Ciqual-based options:  ${top}.  Open Suggested Meals to add them.`;}
+  if(low.includes("suggest")||low.includes("what should i eat")||low.includes("meal")){const sg=suggestMeals();const top=sg.list.slice(0,2).map(m=>`${m.n} → buy/prep ${m.fresh} → cooked ${m.comp} ≈ ${m.cal} kcal, ${m.p}g protein`).join("  •  ");return `With ~${sg.remCal} kcal and ${sg.remPro}g protein left (Ciqual):  ${top}.  Buy the raw amounts; macros are for the cooked meal. Open Suggested Meals to add.`;}
   {const wm=low.match(/(\d{2,3}(?:\.\d)?)\s?kg/)||(low.includes("weigh")?low.match(/(\d{2,3}(?:\.\d)?)/):null);if(wm){const v=parseFloat(wm[1]);if(v>=30&&v<=300){logWeightVal(v);return `Logged ${v}kg with today's date ✓ I'll track the trend. ${learned.length?"Also noted: "+learned.join(", ")+".":""}`;}}}
   if(low.includes("tired")||low.includes("low energy")||low.includes("exhausted"))return "Low energy often means under-eating carbs, poor sleep, or dehydration. How's your sleep and water today? If you're in a deep deficit, a refeed day can help.";
   if(low.includes("hungry")||low.includes("craving"))return "Cravings usually = not enough protein, fiber, or sleep. Try a high-volume, high-protein snack (Greek yogurt, edamame, eggs). Want me to suggest one?";
@@ -776,7 +780,7 @@ function logWeightVal(v){const d=day();const old=d.weight;d.weight=v;d.weightTs=
 
 async function aiReply(text){
   const key=META_DB.apiKey, model=META_DB.apiModel||"claude-haiku-4-5-20251001";
-  const sys="You are a professional registered nutritionist inside a tracking app. STRICT RULES: (1) Use the ANSES-CIQUAL table (ciqual.fr) as your ONLY source for food macronutrients (energy, protein, carbohydrate, fat per 100 g); never use any other database. (2) Before answering any food/meal question, work out the relevant Ciqual foods and their per-100 g values, using the cooked/prepared version. (3) EVERY meal or food recommendation MUST list each ingredient with an explicit COOKED gram quantity and the resulting macros, e.g. '120 g cooked chicken breast + 150 g cooked white rice + 90 g broccoli \u2248 ~430 kcal, ~42 g protein (Ciqual)'. (4) Only discuss nutrition, diet and food \u2014 politely decline anything else. Be concise and personalise using the client data snapshot. No medical diagnoses.";
+  const sys="You are a professional registered nutritionist inside a tracking app. STRICT RULES: (1) Use the ANSES-CIQUAL table (ciqual.fr) as your ONLY source for food macronutrients (energy, protein, carbohydrate, fat per 100 g); never use any other database. (2) Before answering any food/meal question, work out the relevant Ciqual foods and their per-100 g values, using the cooked/prepared version. (3) EVERY meal or food recommendation MUST list each ingredient with an explicit COOKED gram quantity and the resulting macros, e.g. '120 g cooked chicken breast + 150 g cooked white rice + 90 g broccoli \u2248 ~430 kcal, ~42 g protein (Ciqual)'. (4) ALSO give the RAW/fresh weight to buy or prepare for each ingredient (using typical cooking yields) and clearly state the macros are for the COOKED meal, e.g. 'buy ~160 g raw chicken breast \u2192 120 g cooked'. (5) Only discuss nutrition, diet and food \u2014 politely decline anything else. Be concise and personalise using the client data snapshot. No medical diagnoses.";
   const msgs=DB.chat.slice(-10).map(m=>({role:m.role==="user"?"user":"assistant",content:m.text}));
   msgs.push({role:"user",content:`My current data: ${JSON.stringify(dataSnapshot())}\n\nMessage: ${text}`});
   const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",
@@ -928,8 +932,8 @@ function renderMealsTab(){
   if(!sg.list.length){box.innerHTML='<p class="empty">No suggestions fit your filters — try relaxing diet/allergy settings.</p>';return;}
   sg.list.forEach(m=>{const el=document.createElement("div");el.className="sugcard";
     el.innerHTML=`<div class="nm">${esc(m.n)}</div><div class="meta">${m.type} • ${m.cal} kcal</div>
-      <div class="comp">🥄 ${esc(m.comp)} <span style="color:var(--muted)">(cooked)</span></div>
-      <div class="mac"><span>P ${m.p}g</span><span>C ${m.c}g</span><span>F ${m.f}g</span></div>
+      <div class="comp">🛒 ${esc(m.fresh)} <span class="finfo">ⓘ<span class="fpop"><b>Buy / prepare</b> the raw amounts above. The calories &amp; macros are for the <b>cooked</b> meal: ${esc(m.comp)}. Macros per 100 g from Ciqual.</span></span></div>
+      <div class="mac"><span>P ${m.p}g</span><span>C ${m.c}g</span><span>F ${m.f}g</span><span style="background:rgba(92,138,87,.10);border-color:rgba(92,138,87,.2);color:var(--accent)">cooked target</span></div>
       <button class="btn sm">+ Add to today's log</button>`;
     el.querySelector("button").onclick=()=>{day().meals.push({name:m.n,type:m.type,cal:m.cal,pro:m.p,carb:m.c,fat:m.f,ts:now()});save();renderAll();toast("Added "+m.n);};
     box.appendChild(el);});
