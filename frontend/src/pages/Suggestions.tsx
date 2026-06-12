@@ -22,7 +22,7 @@ export default function Suggestions() {
     <div className="grid">
       <section className="card col-12">
         <h2>🍳 Today's Suggested Meals</h2>
-        <p className="hint" style={{ marginTop: 0 }}>Built from your goal, remaining daily budget, and your diet preferences. Tap “Add” to log it.</p>
+        <p className="hint" style={{ marginTop: 0 }}>Built from your goal, remaining daily budget, and your diet preferences. Macros per 100 g from ANSES-CIQUAL; weights are cooked. Tap “Add” to log it.</p>
         <div className="summary-row" style={{ margin: '14px 0' }}>
           <button className="btn ghost sm" onClick={load}>↻ Refresh</button>
           <span className="pill">Remaining: <b>{data.remCal}</b> kcal</span>
@@ -35,6 +35,7 @@ export default function Suggestions() {
             <div key={s.n} className="sugcard">
               <div className="nm">{s.n}</div>
               <div className="meta">{s.type} • {s.cal} kcal</div>
+              <div style={{ fontSize: 11.5, color: 'var(--accent)', fontWeight: 700, margin: '2px 0 8px', lineHeight: 1.45 }}>🥄 {s.comp} (cooked)</div>
               <div className="mac"><span>P {s.p}g</span><span>C {s.c}g</span><span>F {s.f}g</span></div>
               <button className="btn sm" onClick={() => add(s)}>+ Add to today's log</button>
             </div>
