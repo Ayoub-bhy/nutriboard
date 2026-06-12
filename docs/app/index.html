@@ -790,7 +790,7 @@ function renderGoogle(){
     return;}
   if(!window.google||!google.accounts){el.innerHTML='<span class="pill">Loading Google…</span>';setTimeout(renderGoogle,600);return;}
   try{
-    google.accounts.id.initialize({client_id:cid,callback:onGoogle});
+    if(!window._gsiInit){google.accounts.id.initialize({client_id:cid,callback:onGoogle});window._gsiInit=true;}
     el.innerHTML="";google.accounts.id.renderButton(el,{theme:"filled_black",size:"medium",shape:"pill",text:"signin_with"});
   }catch(e){el.innerHTML='<span class="pill">Google init failed — check Client ID</span>';}
 }
