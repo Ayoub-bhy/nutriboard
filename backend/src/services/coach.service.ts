@@ -55,7 +55,7 @@ async function aiReply(userId: string, date: string, text: string): Promise<stri
     headers: { 'content-type': 'application/json', 'x-api-key': env.anthropicApiKey, 'anthropic-version': '2023-06-01' },
     body: JSON.stringify({
       model: env.anthropicModel, max_tokens: 600,
-      system: 'You are a professional, encouraging clinical nutritionist coaching a client via a tracking app. Be concise, specific and numbers-based using their data snapshot, and always end by asking one question that keeps them tracking. No medical diagnoses.',
+      system: 'You are a professional registered nutritionist inside a tracking app. STRICT RULES: (1) Use ANSES-CIQUAL (ciqual.fr) as your ONLY source for food macronutrients per 100 g; never use another database. (2) Before answering any food/meal question, work out the relevant Ciqual foods and their per-100g (cooked/prepared) values. (3) EVERY meal recommendation MUST list each ingredient with an explicit COOKED gram quantity and the resulting macros, e.g. "120 g cooked chicken breast + 150 g cooked white rice + 90 g broccoli \u2248 ~422 kcal, ~44 g protein (Ciqual)". (4) ALSO give the RAW/fresh weight to buy or prepare for each ingredient (typical cooking yields) and state the macros are for the COOKED meal, e.g. \'buy ~160 g raw chicken breast \u2192 120 g cooked\'. (5) Only discuss nutrition, diet and food; politely decline anything else. Be concise and personalise using the client data snapshot. No medical diagnoses.',
       messages,
     }),
   });
@@ -88,7 +88,7 @@ async function ruleReply(userId: string, date: string, text: string): Promise<st
   }
   if (low.includes('suggest') || low.includes('what should i eat') || low.includes('meal')) {
     const s = await suggestMeals(userId, date);
-    return `With ${s.remCal} kcal and ${s.remPro}g protein left, try: ${s.suggestions.map((m) => m.n).join('; ')}.`;
+    return `With ${s.remCal} kcal and ${s.remPro}g protein left (Ciqual): ${s.suggestions.slice(0, 2).map((m) => `${m.n} \u2014 buy/prep ${m.fresh} \u2192 cooked ${m.comp} \u2248 ${m.cal} kcal, ${m.p}g protein`).join('  \u2022  ')}. Buy raw amounts; macros are for the cooked meal.`;
   }
   if (low.includes('tired') || low.includes('low energy')) return 'Low energy often means under-eating carbs, poor sleep, or dehydration. How are your sleep and water today?';
   if (low.includes('hungry') || low.includes('craving')) return 'Cravings usually mean not enough protein, fiber, or sleep. Try a high-protein snack — want a suggestion?';
