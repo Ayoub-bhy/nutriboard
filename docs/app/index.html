@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NutriBoard — Nutrition Coach & Habit Tracker</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#5c8a57">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="NutriBoard">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -294,6 +301,44 @@
   .dvmethod{font-size:11px;color:var(--muted);font-weight:700}
   .dvbadge{margin-left:auto;font-size:10.5px;font-weight:800;color:var(--accent);background:rgba(92,138,87,.12);border:1px solid rgba(92,138,87,.25);padding:3px 9px;border-radius:999px}
   .dvsyncs{font-size:11.5px;color:var(--muted);font-weight:600;margin-bottom:11px;line-height:1.5}
+  /* ---------- settings / toggles / weather ---------- */
+  .setrow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid var(--line)}
+  .setrow:last-child{border-bottom:none}
+  .setrow .lbl{font-weight:800;font-size:14px}
+  .setrow .sub{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:2px;max-width:420px;line-height:1.5}
+  .setrow .ctl{flex-shrink:0;min-width:150px}
+  .switch{position:relative;width:50px;height:28px;flex-shrink:0;cursor:pointer}
+  .switch input{display:none}
+  .switch .track{position:absolute;inset:0;background:var(--panel-2);border:1px solid var(--line);border-radius:999px;transition:.18s}
+  .switch .knob{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:var(--shadow-soft);transition:.2s}
+  .switch input:checked + .track{background:linear-gradient(150deg,var(--accent),var(--accent-2));border-color:var(--accent)}
+  .switch input:checked + .track + .knob{transform:translateX(22px)}
+  .wxcard{display:flex;align-items:center;gap:16px;background:linear-gradient(150deg,rgba(111,168,199,.14),rgba(78,134,171,.10));
+    border:1px solid rgba(111,168,199,.3);border-radius:16px;padding:16px;margin-top:14px}
+  .wxcard .wxic{font-size:40px}
+  .wxcard .wxt{font-family:var(--font-display);font-size:24px;font-weight:600;color:var(--aqua-2)}
+  .wxcard .wxd{font-size:12.5px;color:var(--muted);font-weight:600}
+  .notifbtn-row{display:flex;gap:9px;flex-wrap:wrap;margin-top:8px}
+  .langgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+  @media(max-width:600px){.langgrid{grid-template-columns:1fr 1fr}}
+  .langopt{background:var(--panel-2);border:1.5px solid var(--line);border-radius:14px;padding:12px 8px;text-align:center;cursor:pointer;transition:.16s;font-weight:800}
+  .langopt:hover{border-color:var(--accent-2);transform:translateY(-2px)}
+  .langopt.on{border-color:var(--accent);background:linear-gradient(160deg,rgba(92,138,87,.14),rgba(156,190,90,.10))}
+  .langopt .fl{font-size:26px;display:block;margin-bottom:4px}
+  .langopt .nm2{font-size:12.5px}
+  /* RTL */
+  html[dir="rtl"] body{direction:rtl}
+  html[dir="rtl"] .msg.user{align-self:flex-start}
+  html[dir="rtl"] .msg.coach{align-self:flex-end}
+  html[dir="rtl"] .tip{border-left:none;border-right:4px solid var(--accent-2);border-radius:12px 0 0 12px}
+  html[dir="rtl"] .switch .knob{left:auto;right:3px}
+  html[dir="rtl"] .switch input:checked + .track + .knob{transform:translateX(-22px)}
+  html[dir="rtl"] .tab .dot{margin-left:0;margin-right:6px}
+  .installbar{display:none;align-items:center;gap:12px;background:linear-gradient(135deg,#5c8a57,#9cbe5a);color:#fff;
+    border-radius:16px;padding:14px 18px;margin-bottom:18px;box-shadow:var(--shadow-soft)}
+  .installbar.show{display:flex}
+  .installbar .it{flex:1;font-weight:700;font-size:13.5px}
+  .installbar button{background:#fff;color:#3c6b3a;border:none;border-radius:999px;padding:9px 16px;font-weight:800;cursor:pointer;font-family:inherit}
 </style>
 </head>
 <body>
@@ -307,12 +352,19 @@
   </header>
 
   <div class="tabs" id="tabs">
-    <div class="tab on" data-v="today">📊 Today</div>
-    <div class="tab" data-v="coach">💬 Coach <span class="dot" id="syncDot"></span></div>
-    <div class="tab" data-v="meals">🍳 Suggested Meals</div>
-    <div class="tab" data-v="profile">👤 Profile &amp; Routine</div>
-    <div class="tab" data-v="insights">💡 Insights &amp; Advice</div>
-    <div class="tab" data-v="devices">⌚ Devices</div>
+    <div class="tab on" data-v="today" data-i18n="tab_today">📊 Today</div>
+    <div class="tab" data-v="coach"><span data-i18n="tab_coach">💬 Coach</span> <span class="dot" id="syncDot"></span></div>
+    <div class="tab" data-v="meals" data-i18n="tab_meals">🍳 Suggested Meals</div>
+    <div class="tab" data-v="profile" data-i18n="tab_profile">👤 Profile &amp; Routine</div>
+    <div class="tab" data-v="insights" data-i18n="tab_insights">💡 Insights &amp; Advice</div>
+    <div class="tab" data-v="devices" data-i18n="tab_devices">⌚ Devices</div>
+    <div class="tab" data-v="settings" data-i18n="tab_settings">⚙️ Settings</div>
+  </div>
+
+  <div class="installbar" id="installBar">
+    <span style="font-size:22px">📲</span>
+    <div class="it" data-i18n="install_text">Install NutriBoard on your phone or laptop — works offline and sends you reminders.</div>
+    <button id="installBtn" data-i18n="install_btn">Install app</button>
   </div>
 
   <!-- ============ TODAY ============ -->
@@ -370,6 +422,7 @@
 
       <section class="card col-8">
         <h2>🍽️ Meal Log</h2>
+        <p class="hint" style="margin-top:0">Write down everything you eat and drink as you go. Type the food, choose breakfast/lunch/dinner/snack, then add its calories and grams of protein (P), carbs (C) and fat (F). Not sure of the numbers? Open <b>Suggested Meals</b> and tap “Add” — it fills them in from the Ciqual food database for you.</p>
         <div class="meal-form">
           <div><label>Food / meal</label><input id="mName" placeholder="e.g. Grilled chicken & rice"></div>
           <div><label>Type</label><select id="mType"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option></select></div>
@@ -387,7 +440,7 @@
 
       <section class="card col-4">
         <h2>💧 Hydration <span class="r" id="waterStreak"></span></h2>
-        <div class="water-top"><div><span class="v" id="waterMl">0</span><span class="g"> ml</span></div><div class="g">Goal: <b id="waterGoal">0</b> ml</div></div>
+        <div class="water-top"><div><span class="v" id="waterMl">0</span><span class="g" id="waterUnit1"> ml</span></div><div class="g">Goal: <b id="waterGoal">0</b> <span id="waterUnit2">ml</span></div></div>
         <div class="bar"><i id="waterBar" style="background:linear-gradient(90deg,#6fa8c7,#4e86ab)"></i></div>
         <div class="glasses" id="glasses"></div>
         <div class="water-btns"><button class="btn sm" id="addGlass">+1 glass (250ml)</button><button class="btn ghost sm" id="removeGlass">−1</button></div>
@@ -402,7 +455,8 @@
 
       <section class="card col-7">
         <h2>📈 Body Weight Trend</h2>
-        <div class="w-form"><div><label>Log today's weight (kg)</label><input id="wInput" type="number" step="0.1" placeholder="e.g. 78.4"></div><button class="btn" id="logWeight">Log</button></div>
+        <p class="hint" style="margin-top:0">Weigh yourself at the same time each day — ideally first thing in the morning — and log it here. Day-to-day ups and downs are mostly water, so watch the <b>line over weeks</b>, not single days.</p>
+        <div class="w-form"><div><label id="wInLabel">Log today's weight (kg)</label><input id="wInput" type="number" step="0.1" placeholder="e.g. 78.4"></div><button class="btn" id="logWeight">Log</button></div>
         <div class="lastedit" id="wLastEdit"></div>
         <div class="chartbox"><canvas id="wChart"></canvas></div>
         <div class="summary-row"><span class="pill">Latest: <b id="wLatest">—</b></span><span class="pill">7-day: <b id="wChange">—</b></span><span class="pill">Entries: <b id="wCount">0</b></span></div>
@@ -424,12 +478,13 @@
     <div class="grid">
       <section class="card col-8">
         <h2>💬 Your Nutrition Coach <span class="r" id="coachMode">built-in coach</span></h2>
+        <p class="hint" style="margin-top:0">Your coach reads your logs, profile and today's numbers before answering, and only uses the official ANSES-Ciqual food database for calories and macros. Tell it what you ate, your weight, your allergies or how you feel — it will confirm your details, keep foods you can't eat out of every suggestion, and give amounts in both raw (to buy) and cooked (to eat) grams.</p>
         <div class="sync no" id="syncBar"><span class="badge"></span><span id="syncText">Checking…</span>
           <button class="btn sm" id="syncNow" style="margin-left:auto">Sync now</button></div>
         <div class="chat">
           <div class="msgs" id="msgs"></div>
           <div class="quicks" id="quicks"></div>
-          <div class="chatin"><input id="chatInput" placeholder="Tell your coach anything… (e.g. I'm vegetarian / I hit my water today)"><button class="btn" id="sendChat">Send</button></div>
+          <div class="chatin"><input id="chatInput" placeholder="Tell your coach anything… e.g. “what should I eat now?”, “I'm allergic to nuts”, “I'm 80 kg”"><button class="btn" id="sendChat">Send</button></div>
         </div>
       </section>
       <section class="card col-4">
@@ -450,7 +505,7 @@
     <div class="grid">
       <section class="card col-12">
         <h2>🍳 Today's Suggested Meals <span class="r" id="sugBasis"></span></h2>
-        <p class="hint" style="margin-top:0">Built from your goal, what's left in your daily budget, and the preferences you've shared with your coach. Tap “Add” to log it.</p>
+        <p class="hint" style="margin-top:0">These meals are built from your goal, what's left in today's calorie budget, and your diet preferences. Anything in your <b>allergies or dislikes</b> is automatically left out. Each card shows the <b>raw weight to buy/prepare</b> 🛒 and the <b>cooked</b> calories and macros (from the Ciqual database). Tap “Add” to log it instantly.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0">
           <button class="btn ghost sm" id="sugRefresh">↻ Refresh suggestions</button>
           <span class="pill">Remaining: <b id="sugRemCal">0</b> kcal</span>
@@ -468,7 +523,7 @@
       <section class="card col-6">
         <h2>👤 My Details</h2>
         <div class="row c2"><div><label>Name</label><input id="pName"></div><div><label>Sex</label><select id="sex"><option value="male">Male</option><option value="female">Female</option></select></div></div>
-        <div class="row c3" style="margin-top:12px"><div><label>Age</label><input id="age" type="number"></div><div><label>Weight (kg)</label><input id="weight" type="number" step="0.1"></div><div><label>Height (cm)</label><input id="height" type="number"></div></div>
+        <div class="row c3" style="margin-top:12px"><div><label>Age</label><input id="age" type="number"></div><div><label id="lblWeight">Weight (kg)</label><input id="weight" type="number" step="0.1"></div><div><label id="lblHeight">Height (cm)</label><input id="height" type="number"></div></div>
         <div style="margin-top:12px"><label>Activity level</label><select id="activity">
           <option value="1.2">Sedentary (little/no exercise)</option><option value="1.375">Light (1–3 days/week)</option>
           <option value="1.55">Moderate (3–5 days/week)</option><option value="1.725">Very active (6–7 days/week)</option><option value="1.9">Athlete (2x/day)</option></select></div>
@@ -558,6 +613,68 @@
     </div>
   </div>
 
+  <!-- ============ SETTINGS ============ -->
+  <div class="view" id="v-settings">
+    <div class="grid">
+      <section class="card col-6">
+        <h2>🌐 <span data-i18n="set_language">Language</span></h2>
+        <p class="hint" style="margin-top:0" data-i18n="set_language_sub">Choose the language for the whole app. Arabic switches the layout to right-to-left. Your choice is saved to your account.</p>
+        <div class="langgrid" id="langGrid" style="margin-top:12px"></div>
+      </section>
+
+      <section class="card col-6">
+        <h2>📏 <span data-i18n="set_units">Measurement units</span></h2>
+        <p class="hint" style="margin-top:0" data-i18n="set_units_sub">Pick how body weight, height and water are shown. Metric uses kilograms, centimetres and millilitres. Imperial uses pounds, inches and fluid ounces. Food gram amounts always follow the Ciqual database.</p>
+        <div style="margin-top:14px"><label data-i18n="set_unit_system">Unit system</label>
+          <select id="unitSel"><option value="metric">Metric — kg, cm, ml</option><option value="imperial">Imperial — lb, in, fl oz</option></select></div>
+        <div class="setrow" style="margin-top:6px">
+          <div><div class="lbl" data-i18n="set_country_h">Where you live</div>
+            <div class="sub" data-i18n="set_country_sub">Your city and country let the coach check today's local weather and remind you to drink more when it is hot or humid.</div></div>
+        </div>
+        <div class="row c2"><div><label data-i18n="set_country">Country</label><input id="setCountry" placeholder="e.g. Saudi Arabia"></div>
+          <div><label data-i18n="set_city">City</label><input id="setCity" placeholder="e.g. Riyadh"></div></div>
+        <div class="notifbtn-row"><button class="btn sm" id="saveLocBtn" data-i18n="set_save_loc">Save & check weather</button></div>
+        <div id="wxBox"></div>
+      </section>
+
+      <section class="card col-7">
+        <h2>🔔 <span data-i18n="set_reminders">Smart reminders</span></h2>
+        <p class="hint" style="margin-top:0" data-i18n="set_reminders_sub">NutriBoard can send you friendly notifications on this device — your phone or laptop — to drink water, move your body, take your vitamins, and check today's meal suggestions. Turn on notifications first, then choose what you want to be reminded about.</p>
+        <div class="notifbtn-row">
+          <button class="btn sm" id="enableNotif" data-i18n="set_enable_notif">Turn on notifications</button>
+          <button class="btn ghost sm" id="testNotif" data-i18n="set_test_notif">Send a test notification</button>
+          <span class="pill" id="notifState">—</span>
+        </div>
+        <div style="margin-top:14px">
+          <div class="setrow"><div><div class="lbl">💧 <span data-i18n="rem_water">Drink water</span></div><div class="sub" data-i18n="rem_water_sub">A gentle nudge every couple of hours while you are awake until you reach your daily water goal.</div></div>
+            <label class="switch"><input type="checkbox" id="remWater"><span class="track"></span><span class="knob"></span></label></div>
+          <div class="setrow"><div><div class="lbl">🚶 <span data-i18n="rem_walk">Move &amp; walk</span></div><div class="sub" data-i18n="rem_walk_sub">A reminder in the afternoon to get up, stretch and take a short walk to reach your step goal.</div></div>
+            <label class="switch"><input type="checkbox" id="remWalk"><span class="track"></span><span class="knob"></span></label></div>
+          <div class="setrow"><div><div class="lbl">💊 <span data-i18n="rem_vit">Take vitamins</span></div><div class="sub" data-i18n="rem_vit_sub">A daily reminder at the time you choose to take any vitamins or supplements with food.</div></div>
+            <label class="switch"><input type="checkbox" id="remVit"><span class="track"></span><span class="knob"></span></label></div>
+          <div class="setrow"><div><div class="lbl">🍳 <span data-i18n="rem_meal">Meal suggestions</span></div><div class="sub" data-i18n="rem_meal_sub">Around your meal times, a reminder to open Suggested Meals and pick a Ciqual-based meal that fits your remaining budget.</div></div>
+            <label class="switch"><input type="checkbox" id="remMeal"><span class="track"></span><span class="knob"></span></label></div>
+        </div>
+        <div class="row c2" style="margin-top:14px">
+          <div><label data-i18n="rem_vit_time">Vitamin reminder time</label><input id="vitTime" type="time" value="09:00"></div>
+          <div><label data-i18n="rem_water_every">Water reminder every (hours)</label><input id="waterEvery" type="number" min="1" max="6" value="2"></div>
+        </div>
+      </section>
+
+      <section class="card col-5">
+        <h2>🙍 <span data-i18n="set_account">Account &amp; privacy</span></h2>
+        <p class="hint" style="margin-top:0" data-i18n="set_account_sub">Every person — whether signed in with Google or using the app as a guest — gets their own separate, private data store on this device. Guests never see each other's logs.</p>
+        <div class="setrow"><div><div class="lbl" data-i18n="set_identity">You are using NutriBoard as</div><div class="sub" id="identitySub">—</div></div></div>
+        <div class="notifbtn-row">
+          <button class="btn ghost sm" id="newGuestBtn" data-i18n="set_new_guest">Start a new separate guest profile</button>
+        </div>
+        <p class="hint" data-i18n="set_account_note">Your information is stored privately in this browser, kept separate per person, and is never shared between accounts.</p>
+        <div class="setrow" style="margin-top:8px"><div><div class="lbl">📲 <span data-i18n="set_install">Install as an app</span></div><div class="sub" data-i18n="set_install_sub">Add NutriBoard to your home screen or desktop so it opens like a real app and can send reminders.</div></div>
+          <button class="btn sm" id="installBtn2" data-i18n="install_btn">Install app</button></div>
+      </section>
+    </div>
+  </div>
+
   <p class="hint" style="text-align:center;margin-top:24px">
     Targets use the Mifflin-St Jeor equation — educational estimates, not medical advice. Data is saved privately in this browser per signed-in account.
   </p>
@@ -567,6 +684,112 @@
 
 <script>
 "use strict";
+
+/* ===================== i18n (EN / AR / FR / TR) ===================== */
+const I18N={
+ en:{
+  tab_today:"📊 Today",tab_coach:"💬 Coach",tab_meals:"🍳 Suggested Meals",tab_profile:"👤 Profile & Routine",
+  tab_insights:"💡 Insights & Advice",tab_devices:"⌚ Devices",tab_settings:"⚙️ Settings",
+  install_text:"Install NutriBoard on your phone or laptop — works offline and sends you reminders.",install_btn:"Install app",
+  set_language:"Language",set_language_sub:"Choose the language for the whole app. Arabic switches the layout to right-to-left. Your choice is saved to your account.",
+  set_units:"Measurement units",set_units_sub:"Pick how body weight, height and water are shown. Metric uses kilograms, centimetres and millilitres. Imperial uses pounds, inches and fluid ounces. Food gram amounts always follow the Ciqual database.",
+  set_unit_system:"Unit system",set_country_h:"Where you live",set_country_sub:"Your city and country let the coach check today's local weather and remind you to drink more when it is hot or humid.",
+  set_country:"Country",set_city:"City",set_save_loc:"Save & check weather",
+  set_reminders:"Smart reminders",set_reminders_sub:"NutriBoard can send you friendly notifications on this device — your phone or laptop — to drink water, move your body, take your vitamins, and check today's meal suggestions. Turn on notifications first, then choose what you want to be reminded about.",
+  set_enable_notif:"Turn on notifications",set_test_notif:"Send a test notification",
+  rem_water:"Drink water",rem_water_sub:"A gentle nudge every couple of hours while you are awake until you reach your daily water goal.",
+  rem_walk:"Move & walk",rem_walk_sub:"A reminder in the afternoon to get up, stretch and take a short walk to reach your step goal.",
+  rem_vit:"Take vitamins",rem_vit_sub:"A daily reminder at the time you choose to take any vitamins or supplements with food.",
+  rem_meal:"Meal suggestions",rem_meal_sub:"Around your meal times, a reminder to open Suggested Meals and pick a Ciqual-based meal that fits your remaining budget.",
+  rem_vit_time:"Vitamin reminder time",rem_water_every:"Water reminder every (hours)",
+  set_account:"Account & privacy",set_account_sub:"Every person — whether signed in with Google or using the app as a guest — gets their own separate, private data store on this device. Guests never see each other's logs.",
+  set_identity:"You are using NutriBoard as",set_new_guest:"Start a new separate guest profile",
+  set_account_note:"Your information is stored privately in this browser, kept separate per person, and is never shared between accounts.",
+  set_install:"Install as an app",set_install_sub:"Add NutriBoard to your home screen or desktop so it opens like a real app and can send reminders.",
+  notif_on:"Notifications on",notif_off:"Notifications off",notif_blocked:"Blocked in browser settings"
+ },
+ ar:{
+  tab_today:"📊 اليوم",tab_coach:"💬 المدرب",tab_meals:"🍳 وجبات مقترحة",tab_profile:"👤 الملف والروتين",
+  tab_insights:"💡 نصائح ومعلومات",tab_devices:"⌚ الأجهزة",tab_settings:"⚙️ الإعدادات",
+  install_text:"ثبّت نيوتري بورد على هاتفك أو حاسوبك — يعمل دون إنترنت ويرسل لك التذكيرات.",install_btn:"تثبيت التطبيق",
+  set_language:"اللغة",set_language_sub:"اختر لغة التطبيق بالكامل. العربية تحوّل التخطيط من اليمين إلى اليسار. يتم حفظ اختيارك في حسابك.",
+  set_units:"وحدات القياس",set_units_sub:"اختر طريقة عرض الوزن والطول والماء. المتري يستخدم الكيلوغرام والسنتيمتر والملليلتر. الإمبراطوري يستخدم الباوند والبوصة والأونصة السائلة. أوزان الطعام بالغرام تتبع دائماً قاعدة بيانات سيكوال.",
+  set_unit_system:"نظام الوحدات",set_country_h:"أين تعيش",set_country_sub:"مدينتك وبلدك يتيحان للمدرب التحقق من طقس اليوم وتذكيرك بشرب المزيد عندما يكون الجو حاراً أو رطباً.",
+  set_country:"البلد",set_city:"المدينة",set_save_loc:"حفظ والتحقق من الطقس",
+  set_reminders:"تذكيرات ذكية",set_reminders_sub:"يمكن لنيوتري بورد إرسال إشعارات ودية على هذا الجهاز — هاتفك أو حاسوبك — لشرب الماء وتحريك جسمك وتناول الفيتامينات والاطلاع على وجبات اليوم المقترحة. فعّل الإشعارات أولاً ثم اختر ما تريد أن تُذكَّر به.",
+  set_enable_notif:"تفعيل الإشعارات",set_test_notif:"إرسال إشعار تجريبي",
+  rem_water:"شرب الماء",rem_water_sub:"تنبيه لطيف كل ساعتين أثناء استيقاظك حتى تبلغ هدف الماء اليومي.",
+  rem_walk:"الحركة والمشي",rem_walk_sub:"تذكير بعد الظهر للوقوف والتمدد والمشي القصير لبلوغ هدف خطواتك.",
+  rem_vit:"تناول الفيتامينات",rem_vit_sub:"تذكير يومي في الوقت الذي تختاره لتناول أي فيتامينات أو مكمّلات مع الطعام.",
+  rem_meal:"اقتراحات الوجبات",rem_meal_sub:"حول مواعيد وجباتك، تذكير بفتح الوجبات المقترحة واختيار وجبة من سيكوال تناسب ما تبقى من سعراتك.",
+  rem_vit_time:"وقت تذكير الفيتامينات",rem_water_every:"تذكير الماء كل (ساعات)",
+  set_account:"الحساب والخصوصية",set_account_sub:"كل شخص — سواء سجّل الدخول عبر جوجل أو استخدم التطبيق كضيف — يحصل على مساحة بيانات خاصة ومنفصلة على هذا الجهاز. الضيوف لا يرون سجلات بعضهم.",
+  set_identity:"أنت تستخدم نيوتري بورد كـ",set_new_guest:"بدء ملف ضيف منفصل جديد",
+  set_account_note:"تُحفظ معلوماتك بشكل خاص في هذا المتصفح، منفصلة لكل شخص، ولا تُشارك أبداً بين الحسابات.",
+  set_install:"التثبيت كتطبيق",set_install_sub:"أضف نيوتري بورد إلى شاشتك الرئيسية أو سطح المكتب ليفتح كتطبيق حقيقي ويرسل التذكيرات.",
+  notif_on:"الإشعارات مفعّلة",notif_off:"الإشعارات متوقفة",notif_blocked:"محظورة في إعدادات المتصفح"
+ },
+ fr:{
+  tab_today:"📊 Aujourd'hui",tab_coach:"💬 Coach",tab_meals:"🍳 Repas suggérés",tab_profile:"👤 Profil & routine",
+  tab_insights:"💡 Conseils & infos",tab_devices:"⌚ Appareils",tab_settings:"⚙️ Réglages",
+  install_text:"Installez NutriBoard sur votre téléphone ou ordinateur — fonctionne hors ligne et envoie des rappels.",install_btn:"Installer l'app",
+  set_language:"Langue",set_language_sub:"Choisissez la langue de toute l'application. L'arabe passe la mise en page de droite à gauche. Votre choix est enregistré sur votre compte.",
+  set_units:"Unités de mesure",set_units_sub:"Choisissez l'affichage du poids, de la taille et de l'eau. Le métrique utilise kilogrammes, centimètres et millilitres. L'impérial utilise livres, pouces et onces liquides. Les grammes des aliments suivent toujours la base Ciqual.",
+  set_unit_system:"Système d'unités",set_country_h:"Où vous vivez",set_country_sub:"Votre ville et votre pays permettent au coach de vérifier la météo locale et de vous rappeler de boire plus quand il fait chaud ou humide.",
+  set_country:"Pays",set_city:"Ville",set_save_loc:"Enregistrer & vérifier la météo",
+  set_reminders:"Rappels intelligents",set_reminders_sub:"NutriBoard peut envoyer des notifications amicales sur cet appareil — téléphone ou ordinateur — pour boire de l'eau, bouger, prendre vos vitamines et consulter les repas suggérés. Activez d'abord les notifications, puis choisissez vos rappels.",
+  set_enable_notif:"Activer les notifications",set_test_notif:"Envoyer une notification test",
+  rem_water:"Boire de l'eau",rem_water_sub:"Un petit rappel toutes les deux heures pendant la journée jusqu'à atteindre votre objectif d'eau.",
+  rem_walk:"Bouger & marcher",rem_walk_sub:"Un rappel l'après-midi pour vous lever, vous étirer et faire une courte marche vers votre objectif de pas.",
+  rem_vit:"Prendre les vitamines",rem_vit_sub:"Un rappel quotidien à l'heure choisie pour prendre vos vitamines ou compléments avec un repas.",
+  rem_meal:"Suggestions de repas",rem_meal_sub:"Autour de vos heures de repas, un rappel pour ouvrir les repas suggérés et choisir un repas Ciqual adapté à votre budget restant.",
+  rem_vit_time:"Heure du rappel vitamines",rem_water_every:"Rappel d'eau toutes les (heures)",
+  set_account:"Compte & confidentialité",set_account_sub:"Chaque personne — connectée avec Google ou en tant qu'invité — dispose de son propre espace de données privé sur cet appareil. Les invités ne voient jamais les journaux des autres.",
+  set_identity:"Vous utilisez NutriBoard en tant que",set_new_guest:"Démarrer un nouveau profil invité séparé",
+  set_account_note:"Vos informations sont stockées en privé dans ce navigateur, séparées par personne, et jamais partagées entre comptes.",
+  set_install:"Installer comme une app",set_install_sub:"Ajoutez NutriBoard à votre écran d'accueil ou bureau pour l'ouvrir comme une vraie app et recevoir des rappels.",
+  notif_on:"Notifications activées",notif_off:"Notifications désactivées",notif_blocked:"Bloquées dans le navigateur"
+ },
+ tr:{
+  tab_today:"📊 Bugün",tab_coach:"💬 Koç",tab_meals:"🍳 Önerilen Öğünler",tab_profile:"👤 Profil & Rutin",
+  tab_insights:"💡 İpuçları & Bilgi",tab_devices:"⌚ Cihazlar",tab_settings:"⚙️ Ayarlar",
+  install_text:"NutriBoard'u telefonunuza veya bilgisayarınıza kurun — çevrimdışı çalışır ve hatırlatma gönderir.",install_btn:"Uygulamayı kur",
+  set_language:"Dil",set_language_sub:"Tüm uygulamanın dilini seçin. Arapça düzeni sağdan sola çevirir. Seçiminiz hesabınıza kaydedilir.",
+  set_units:"Ölçü birimleri",set_units_sub:"Vücut ağırlığı, boy ve suyun nasıl gösterileceğini seçin. Metrik kilogram, santimetre ve mililitre kullanır. İmparatorluk birimleri pound, inç ve sıvı ons kullanır. Yiyecek gram miktarları her zaman Ciqual veritabanını izler.",
+  set_unit_system:"Birim sistemi",set_country_h:"Yaşadığınız yer",set_country_sub:"Şehriniz ve ülkeniz, koçun bugünkü yerel havayı kontrol etmesini ve sıcak veya nemli olduğunda daha fazla su içmenizi hatırlatmasını sağlar.",
+  set_country:"Ülke",set_city:"Şehir",set_save_loc:"Kaydet & havayı kontrol et",
+  set_reminders:"Akıllı hatırlatmalar",set_reminders_sub:"NutriBoard bu cihazda — telefonunuz veya bilgisayarınız — su içmek, hareket etmek, vitaminlerinizi almak ve bugünkü öğün önerilerini görmek için dostça bildirimler gönderebilir. Önce bildirimleri açın, sonra neyin hatırlatılacağını seçin.",
+  set_enable_notif:"Bildirimleri aç",set_test_notif:"Test bildirimi gönder",
+  rem_water:"Su iç",rem_water_sub:"Günlük su hedefinize ulaşana kadar uyanıkken birkaç saatte bir nazik bir hatırlatma.",
+  rem_walk:"Hareket et & yürü",rem_walk_sub:"Öğleden sonra kalkıp esneme ve adım hedefinize ulaşmak için kısa yürüyüş hatırlatması.",
+  rem_vit:"Vitamin al",rem_vit_sub:"Seçtiğiniz saatte vitamin veya takviyelerinizi yemekle almanız için günlük hatırlatma.",
+  rem_meal:"Öğün önerileri",rem_meal_sub:"Öğün saatlerinizde, Önerilen Öğünler'i açıp kalan bütçenize uygun bir Ciqual öğünü seçmeniz için hatırlatma.",
+  rem_vit_time:"Vitamin hatırlatma saati",rem_water_every:"Su hatırlatması (saatte bir)",
+  set_account:"Hesap & gizlilik",set_account_sub:"Her kişi — Google ile giriş yapsın veya misafir olarak kullansın — bu cihazda kendi ayrı, özel veri alanına sahiptir. Misafirler birbirlerinin kayıtlarını asla görmez.",
+  set_identity:"NutriBoard'u şu olarak kullanıyorsunuz",set_new_guest:"Yeni ayrı bir misafir profili başlat",
+  set_account_note:"Bilgileriniz bu tarayıcıda özel olarak, kişi başına ayrı saklanır ve hesaplar arasında asla paylaşılmaz.",
+  set_install:"Uygulama olarak kur",set_install_sub:"NutriBoard'u ana ekranınıza veya masaüstünüze ekleyin; gerçek bir uygulama gibi açılsın ve hatırlatma göndersin.",
+  notif_on:"Bildirimler açık",notif_off:"Bildirimler kapalı",notif_blocked:"Tarayıcıda engellendi"
+ }
+};
+function lang(){return (DB&&DB.profile&&DB.profile.lang)||"en";}
+function t(k){const L=I18N[lang()]||I18N.en;return (L[k]!=null?L[k]:(I18N.en[k]!=null?I18N.en[k]:k));}
+function applyLang(){
+  const lg=lang();
+  document.documentElement.lang=lg;
+  document.documentElement.dir=(lg==="ar")?"rtl":"ltr";
+  document.querySelectorAll("[data-i18n]").forEach(el=>{const k=el.getAttribute("data-i18n");const v=t(k);if(v!=null)el.textContent=v;});
+  document.querySelectorAll("[data-i18n-ph]").forEach(el=>{const k=el.getAttribute("data-i18n-ph");const v=t(k);if(v!=null)el.placeholder=v;});
+}
+
+/* ===================== UNITS (metric / imperial) ===================== */
+function unitSys(){return (DB&&DB.profile&&DB.profile.units)||"metric";}
+function imp(){return unitSys()==="imperial";}
+const U={
+  wDisp:v=>imp()?+(v*2.20462).toFixed(1):+(+v).toFixed(1), wIn:v=>imp()?+(v/2.20462).toFixed(2):+v, wU:()=>imp()?"lb":"kg",
+  hDisp:v=>imp()?+(v/2.54).toFixed(1):+v, hIn:v=>imp()?+(v*2.54).toFixed(1):+v, hU:()=>imp()?"in":"cm",
+  vDisp:v=>imp()?Math.round(v/29.5735):Math.round(v), vU:()=>imp()?"fl oz":"ml"
+};
 /* ===================== ACCOUNT & STORAGE ===================== */
 const META="nutriboard.meta";        // holds account + google client id
 const DEFAULT_GOOGLE_CLIENT_ID="1088958164885-4fvjjctb0mhtk3i9v192vb109s5tckfe.apps.googleusercontent.com";
@@ -583,11 +806,14 @@ function now(){return new Date().toISOString();}
 function freshDB(){return{
   profile:{name:"",sex:"male",age:30,weight:78,height:178,activity:1.55,goal:"maintain",
     dietType:"omnivore",allergies:"",dislikes:"",wake:"07:00",sleep:"23:00",
-    t_breakfast:"08:00",t_lunch:"13:00",t_dinner:"19:30",trainDays:"",routineNotes:""},
+    t_breakfast:"08:00",t_lunch:"13:00",t_dinner:"19:30",trainDays:"",routineNotes:"",
+    country:"",city:"",units:"metric",lang:"en"},
   habitDefs:["8h sleep","10k steps","5 veg servings","No late-night snacking","Protein at every meal"],
   history:[], chat:[], coach:{lastHash:"",prefsLearned:[]},
   water:{base:0,target:0,streak:0,lastEval:""},
   devices:{}, eatBack:true,
+  reminders:{water:true,walk:true,vitamins:false,meals:true,vitTime:"09:00",waterEvery:2,fired:{}},
+  weather:null,
   days:{}
 };}
 function loadData(){try{const d=JSON.parse(localStorage.getItem(dataKey()));if(d&&d.profile)return migrate(d);}catch(e){}
@@ -662,13 +888,26 @@ const CIQUAL={
   cod:["cod, cooked",105,23,0,1,0.8], potato:["potato, boiled",87,2,20,0.1,1], sweetpotato:["sweet potato, cooked",90,1.6,20,0.1,1],
   tempeh:["tempeh, cooked",190,20,8,11,1], cottage:["cottage cheese",98,11,3.4,4.3,1], pineapple:["pineapple",50,0.5,13,0.1,1],
   apple:["apple",54,0.3,14,0.2,1], peanutbutter:["peanut butter",588,25,12,50,1], almonds:["almonds",579,21,9,50,1],
-  edamame:["edamame, cooked",121,12,9,5,1], cucumber:["cucumber",15,0.7,3,0.1,1]
+  edamame:["edamame, cooked",121,12,9,5,1], cucumber:["cucumber",15,0.7,3,0.1,1],
+  tuna:["tuna, canned in water",116,26,0,1,1], shrimp:["shrimp, cooked",99,21,0.2,1.4,0.85],
+  mackerel:["mackerel, cooked",262,24,0,18,0.8], sardines:["sardines, canned",208,25,0,11,1],
+  feta:["feta cheese",264,14,1.5,21,1], mozzarella:["mozzarella",254,18,3,19,1],
+  milk:["semi-skimmed milk",47,3.4,4.8,1.6,1], kefir:["kefir",51,3.3,4,1.7,1], skyr:["skyr, plain",63,11,4,0.2,1],
+  spinach:["spinach, cooked",23,2.9,1.4,0.4,0.7], tomato:["tomato",18,0.9,3.5,0.2,1], carrot:["carrot, cooked",35,0.8,7,0.2,0.9],
+  pepper:["bell pepper",26,1,5,0.3,1], zucchini:["zucchini, cooked",19,1.2,2.5,0.3,0.85], mushroom:["mushroom, cooked",28,3,3,0.5,0.7],
+  asparagus:["asparagus, cooked",22,2.4,4,0.2,0.9], oliveoil:["olive oil",899,0,0,100,1],
+  wholewheatpasta:["whole-wheat pasta, cooked",124,5,24,1.1,2.5], couscous:["couscous, cooked",112,3.8,23,0.2,2.8],
+  bulgur:["bulgur, cooked",83,3,18,0.2,2.8], farro:["farro, cooked",130,5,26,1,2.5],
+  blackbeans:["black beans, cooked",132,8.9,23,0.5,2.4], kidneybeans:["kidney beans, cooked",127,8.7,22,0.5,2.4], peas:["green peas, cooked",84,5.4,14,0.4,0.95],
+  walnuts:["walnuts",654,15,14,65,1], pumpkinseeds:["pumpkin seeds",559,30,11,49,1], chia:["chia seeds",486,17,42,31,1],
+  dates:["dates",282,2.5,75,0.2,1], orange:["orange",47,0.9,12,0.1,1], strawberries:["strawberries",33,0.7,8,0.3,1],
+  kiwi:["kiwi",61,1.1,15,0.5,1], mango:["mango",60,0.8,15,0.4,1], groundturkey:["lean ground turkey, cooked",176,27,0,7,0.7]
 };
 function mkMeal(n,type,tags,comp){
   let cal=0,p=0,c=0,f=0;const cooked=[],fresh=[];
   comp.forEach(([k,g])=>{const a=CIQUAL[k],r=g/100;cal+=a[1]*r;p+=a[2]*r;c+=a[3]*r;f+=a[4]*r;
     cooked.push(g+" g "+a[0]);const raw=Math.round(g/(a[5]||1));fresh.push("~"+raw+" g "+a[0].replace(/, (cooked|boiled)$/,"")+(a[5]!==1?" (raw)":""));});
-  return {n,type,tags,cal:Math.round(cal),p:Math.round(p),c:Math.round(c),f:Math.round(f),comp:cooked.join(" + "),fresh:fresh.join(" + ")};
+  return {n,type,tags,cal:Math.round(cal),p:Math.round(p),c:Math.round(c),f:Math.round(f),comp:cooked.join(" + "),fresh:fresh.join(" + "),keys:comp.map(x=>x[0])};
 }
 const FOODS=[
   mkMeal("Greek yogurt, berries & honey","Breakfast",["vegetarian","mediterranean"],[["yogurt",170],["berries",80],["honey",15]]),
@@ -687,20 +926,60 @@ const FOODS=[
   mkMeal("Apple & peanut butter","Snack",["vegan","vegetarian"],[["apple",130],["peanutbutter",20]]),
   mkMeal("Protein shake & almonds","Snack",["vegetarian","keto"],[["whey",30],["almonds",20]]),
   mkMeal("Edamame","Snack",["vegan","vegetarian"],[["edamame",150]]),
-  mkMeal("Boiled eggs & cucumber","Snack",["vegetarian","keto","halal"],[["egg",100],["cucumber",120]])
+  mkMeal("Boiled eggs & cucumber","Snack",["vegetarian","keto","halal"],[["egg",100],["cucumber",120]]),
+  mkMeal("Tuna & chickpea salad","Lunch",["pescatarian","mediterranean"],[["tuna",100],["chickpeas",120],["tomato",80],["oliveoil",8]]),
+  mkMeal("Sheet-pan salmon & asparagus","Dinner",["pescatarian","mediterranean","keto"],[["salmon",130],["asparagus",120],["oliveoil",6]]),
+  mkMeal("Shrimp, bulgur & peppers","Dinner",["pescatarian","mediterranean"],[["shrimp",120],["bulgur",150],["pepper",80]]),
+  mkMeal("Mackerel & couscous bowl","Lunch",["pescatarian","mediterranean"],[["mackerel",110],["couscous",150],["spinach",80]]),
+  mkMeal("Sardine & tomato salad","Lunch",["pescatarian","mediterranean"],[["sardines",90],["tomato",100],["greens",60],["oliveoil",6]]),
+  mkMeal("Greek yogurt, berries & walnuts","Snack",["vegetarian","mediterranean"],[["yogurt",170],["berries",60],["walnuts",15]]),
+  mkMeal("Quinoa pudding & berries","Breakfast",["vegetarian","mediterranean"],[["quinoa",150],["milk",120],["berries",60],["chia",10]]),
+  mkMeal("Sweet potato & eggs","Breakfast",["vegetarian","halal"],[["sweetpotato",150],["egg",100]]),
+  mkMeal("Feta, tomato & couscous","Lunch",["vegetarian","mediterranean"],[["couscous",150],["feta",50],["tomato",90],["oliveoil",6]]),
+  mkMeal("Turkey-stuffed sweet potato","Dinner",["halal"],[["groundturkey",120],["sweetpotato",180],["avocado",40]]),
+  mkMeal("Chicken, couscous & roasted veg","Lunch",["halal","mediterranean"],[["chicken",120],["couscous",150],["zucchini",80],["pepper",60]]),
+  mkMeal("Black bean & rice bowl","Lunch",["vegan","vegetarian"],[["blackbeans",150],["rice",120],["pepper",60],["avocado",40]]),
+  mkMeal("Spinach & mushroom omelette","Breakfast",["vegetarian","keto","halal"],[["egg",150],["spinach",60],["mushroom",60]]),
+  mkMeal("Kale & chickpea salad","Lunch",["vegan","vegetarian","mediterranean"],[["chickpeas",150],["greens",80],["tomato",80],["oliveoil",8]]),
+  mkMeal("Cottage cheese, kiwi & seeds","Snack",["vegetarian"],[["cottage",150],["kiwi",80],["pumpkinseeds",15]]),
+  mkMeal("Skyr, orange & chia","Snack",["vegetarian"],[["skyr",150],["orange",100],["chia",10]]),
+  mkMeal("Whole-wheat pasta & turkey bolognese","Dinner",["halal","mediterranean"],[["wholewheatpasta",150],["groundturkey",100],["tomato",100]]),
+  mkMeal("Lentil soup & greens","Lunch",["vegan","vegetarian","mediterranean"],[["lentils",200],["carrot",60],["spinach",60]]),
+  mkMeal("Mozzarella, tomato & basil plate","Snack",["vegetarian","mediterranean","keto"],[["mozzarella",80],["tomato",120],["oliveoil",6]]),
+  mkMeal("Kefir, banana & oats","Breakfast",["vegetarian"],[["oats",200],["kefir",150],["banana",100]]),
+  mkMeal("Dates & almonds","Snack",["vegan","vegetarian"],[["dates",40],["almonds",20]]),
+  mkMeal("Beef, bulgur & tomato salad","Dinner",["halal","mediterranean"],[["beef",120],["bulgur",150],["tomato",80]]),
+  mkMeal("Farro, peas & feta","Lunch",["vegetarian","mediterranean"],[["farro",150],["peas",80],["feta",40]])
 ];
+
+const ALLERGENS={
+  nut:["almonds","peanutbutter","walnuts"], peanut:["peanutbutter"],
+  dairy:["yogurt","cottage","whey","milk","kefir","feta","mozzarella","skyr"],
+  egg:["egg"], soy:["tofu","tempeh","edamame"],
+  fish:["salmon","cod","tuna","mackerel","sardines"], shellfish:["shrimp"],
+  gluten:["wholewheatpasta","couscous","bulgur","farro","oats"], sesame:["hummus"], seeds:["pumpkinseeds","chia"]
+};
+function avoidKeys(text){
+  const low=(text||"").toLowerCase(); const ks=new Set();
+  const map={nut:"nut",nuts:"nut",almond:"nut",walnut:"nut",peanut:"peanut",dairy:"dairy",milk:"dairy",lactose:"dairy",cheese:"dairy",
+    egg:"egg",eggs:"egg",soy:"soy",soya:"soy",tofu:"soy",fish:"fish",salmon:"fish",tuna:"fish",shellfish:"shellfish",shrimp:"shellfish",prawn:"shellfish",
+    gluten:"gluten",wheat:"gluten",sesame:"sesame",seed:"seeds"};
+  Object.keys(map).forEach(w=>{if(low.includes(w))ALLERGENS[map[w]].forEach(k=>ks.add(k));});
+  // direct ingredient-name matches (e.g. "mushroom", "banana")
+  low.split(",").map(x=>x.trim()).filter(Boolean).forEach(term=>{
+    Object.entries(CIQUAL).forEach(([k,a])=>{if(a[0].toLowerCase().includes(term))ks.add(k);});});
+  return ks;
+}
 function suggestMeals(){
   const c=calc(),tot=dayTotals();
   const remCal=Math.max(0,c.target-tot.cal), remPro=Math.max(0,c.proG-tot.pro);
   const p=DB.profile, diet=p.dietType;
-  const avoid=(p.allergies+","+p.dislikes).toLowerCase().split(",").map(s=>s.trim()).filter(Boolean);
+  const avoidTerms=(p.allergies+","+p.dislikes).toLowerCase().split(",").map(s=>s.trim()).filter(Boolean);
+  const badKeys=avoidKeys(p.allergies+","+p.dislikes);
   let pool=FOODS.filter(f=>{
-    if(diet!=="omnivore" && !f.tags.includes(diet)){
-      // omnivore eats all; others must match tag
-      if(diet==="keto" && !f.tags.includes("keto"))return false;
-      if(diet!=="keto" && !f.tags.includes(diet))return false;
-    }
-    if(avoid.some(a=>a&&f.n.toLowerCase().includes(a)))return false;
+    if(diet!=="omnivore" && !f.tags.includes(diet))return false;     // non-omnivore diets must match the tag
+    if(f.keys && f.keys.some(k=>badKeys.has(k)))return false;          // exclude meals containing an allergen/disliked ingredient
+    if(avoidTerms.some(a=>a&&f.n.toLowerCase().includes(a)))return false;
     return true;
   });
   // prefer high protein-per-calorie, and meals that fit remaining budget
@@ -749,6 +1028,9 @@ function coachReview(){
   if(!d.meals.length) lines.push(`• No meals logged yet — what did you eat last? Tell me and I'll log it mentally.`);
   if(d.weight==null && curDate==todayStr()) lines.push(`• Haven't weighed in today. Same time, same conditions gives the cleanest trend.`);
   if(rem<-100) lines.push(`• You're over target — that's fine occasionally. Want lighter options for the rest of the day? Check Suggested Meals.`);
+  const al=(DB.profile.allergies||"").trim();
+  lines.push(`• I'm using your profile — goal ${GOALS[DB.profile.goal].t}, ${U.wDisp(DB.profile.weight)}${U.wU()}, diet ${DB.profile.dietType}, allergies ${al||"none set"}. If your allergies or diet changed, tell me and I'll keep those foods out of every suggestion.`);
+  const wa=weatherAdvice();if(wa)lines.push(`• ${wa}`);
   lines.push(`What would you like to focus on next?`);
   return lines.join("\n");
 }
@@ -759,11 +1041,23 @@ function coachReply(text){
   const prefMap={vegetarian:"vegetarian",vegan:"vegan",pescatarian:"pescatarian",keto:"keto / low-carb",halal:"halal"};
   Object.keys(prefMap).forEach(k=>{if(low.includes(k)&&!DB.coach.prefsLearned.includes(prefMap[k])){DB.coach.prefsLearned.push(prefMap[k]);learned.push(prefMap[k]);
     if(["vegetarian","vegan","pescatarian","keto","halal"].includes(k)){const old=DB.profile.dietType;DB.profile.dietType=k==="keto"?"keto":k;recordChange("Diet type",old,DB.profile.dietType);}}});
-  const allergyM=low.match(/allergic to ([a-z, ]+)/);if(allergyM){const a=allergyM[1].trim();if(!DB.profile.allergies.includes(a)){DB.profile.allergies=(DB.profile.allergies?DB.profile.allergies+", ":"")+a;learned.push("avoid "+a);}}
+  const allergyM=low.match(/allergic to ([a-z, ]+)/)||low.match(/(?:can't|cannot|don't|do not) (?:eat|have) ([a-z, ]+)/);if(allergyM){const a=allergyM[1].trim().replace(/\.$/,"");if(!DB.profile.allergies.toLowerCase().includes(a)){DB.profile.allergies=(DB.profile.allergies?DB.profile.allergies+", ":"")+a;learned.push("allergy: "+a);}}
   if(low.includes("dislike")||low.includes("hate")){const dm=low.match(/(?:dislike|hate)s? ([a-z, ]+)/);if(dm){DB.profile.dislikes=(DB.profile.dislikes?DB.profile.dislikes+", ":"")+dm[1].trim();learned.push("dislike "+dm[1].trim());}}
 
+  // collect & confirm the essentials once before giving tailored advice
+  if(!DB.coach.intakeDone && /(eat|meal|protein|calorie|kcal|lose|gain|bulk|cut|diet|weight|plan|suggest|macro)/.test(low)){
+    DB.coach.intakeDone=true;save();
+    const p=DB.profile;
+    return `Before I tailor anything, let me confirm what I have so I don't give you wrong advice:\n`+
+      `• Goal: ${GOALS[p.goal].t}\n`+
+      `• Body: ${U.wDisp(p.weight)}${U.wU()}, ${U.hDisp(p.height)}${U.hU()}, age ${p.age}, ${p.sex}\n`+
+      `• Diet: ${p.dietType}\n`+
+      `• Allergies / avoid: ${p.allergies||"none set"}\n`+
+      `• Location: ${(p.city||p.country)?((p.city?p.city+", ":"")+(p.country||"")):"not set — add it in Settings for weather-aware hydration"}\n\n`+
+      `If anything is wrong just tell me (e.g. "I'm allergic to nuts", "my goal is fat loss", "I'm 80 kg"), and I'll update it instantly. Otherwise, ask away${p.name?", "+p.name:""} — what would you like?`;
+  }
   // intents
-  if(low.includes("water")||low.includes("hydrat")){const d=day();return `You're at ${d.water}/${DB.water.target}ml. ${d.water>=DB.water.target?"Goal hit — nice. Your streak is "+DB.water.streak+" day(s). I'll nudge the target up as you stay consistent.":"Add "+Math.max(0,DB.water.target-d.water)+"ml more to hit today's goal."}`;}
+  if(low.includes("water")||low.includes("hydrat")){const d=day();const wa=weatherAdvice();return `You're at ${U.vDisp(d.water)}/${U.vDisp(DB.water.target)} ${U.vU()}. ${d.water>=DB.water.target?"Goal hit — nice. Your streak is "+DB.water.streak+" day(s). I'll nudge the target up as you stay consistent.":"Add "+U.vDisp(Math.max(0,DB.water.target-d.water))+" "+U.vU()+" more to hit today's goal."}${wa?" "+wa:""}`;}
   if(low.includes("protein")){const t=dayTotals(),c=calc();return `Protein: ${Math.round(t.pro)}/${c.proG}g. ${t.pro>=c.proG?"Target met 💪":"Aim for "+Math.round((c.proG-t.pro))+"g more — e.g. 100 g cooked chicken breast ≈ 31 g, 150 g cooked lentils ≈ 14 g, 30 g whey ≈ 24 g (Ciqual)."}`;}
   if(low.includes("suggest")||low.includes("what should i eat")||low.includes("meal")){const sg=suggestMeals();const top=sg.list.slice(0,2).map(m=>`${m.n} → buy/prep ${m.fresh} → cooked ${m.comp} ≈ ${m.cal} kcal, ${m.p}g protein`).join("  •  ");return `With ~${sg.remCal} kcal and ${sg.remPro}g protein left (Ciqual):  ${top}.  Buy the raw amounts; macros are for the cooked meal. Open Suggested Meals to add.`;}
   {const wm=low.match(/(\d{2,3}(?:\.\d)?)\s?kg/)||(low.includes("weigh")?low.match(/(\d{2,3}(?:\.\d)?)/):null);if(wm){const v=parseFloat(wm[1]);if(v>=30&&v<=300){logWeightVal(v);return `Logged ${v}kg with today's date ✓ I'll track the trend. ${learned.length?"Also noted: "+learned.join(", ")+".":""}`;}}}
@@ -799,7 +1093,7 @@ function renderAccount(){
     document.getElementById("signout").onclick=()=>{delete META_DB.account;saveMeta();location.reload();};
   } else {
     box.innerHTML=`<div id="gbtn"></div><button class="btn ghost sm" id="guest">Continue as guest</button>`;
-    document.getElementById("guest").onclick=()=>{META_DB.account={email:"guest",name:"Guest"};saveMeta();boot();};
+    document.getElementById("guest").onclick=()=>{if(!isGuest()){META_DB.account={email:"guest-"+uid(),name:"Guest",guest:true};saveMeta();}boot();};
     renderGoogle();
   }
 }
@@ -858,7 +1152,10 @@ function renderMeals(){
 }
 function renderWater(){
   evalWater();const tgt=waterTarget(),d=day();
-  waterMl.textContent=d.water;waterGoal.textContent=tgt;
+  waterMl.textContent=U.vDisp(d.water);waterGoal.textContent=U.vDisp(tgt);
+  var wu1=document.getElementById("waterUnit1");if(wu1)wu1.textContent=" "+U.vU();
+  var wu2=document.getElementById("waterUnit2");if(wu2)wu2.textContent=U.vU();
+  var agb=document.getElementById("addGlass");if(agb)agb.textContent=imp()?"+1 glass (8 fl oz)":"+1 glass (250 ml)";
   waterBar.style.width=Math.min(100,d.water/tgt*100||0)+"%";
   waterStreak.textContent=DB.water.streak?`🔥 ${DB.water.streak}-day streak`:"";
   const g=document.getElementById("glasses");g.innerHTML="";
@@ -868,7 +1165,7 @@ function renderWater(){
   const pct=Math.round(d.water/tgt*100||0);
   let msg;
   if(pct>=100)msg=`✅ Goal smashed! ${DB.water.streak>=5?"You've been so consistent I bumped your target up — keep leveling up.":"Stay consistent and I'll raise your target to push you further."}`;
-  else if(pct>=60)msg=`💪 ${pct}% there — ${tgt-d.water}ml to go. You've got this.`;
+  else if(pct>=60)msg=`💪 ${pct}% there — ${U.vDisp(tgt-d.water)} ${U.vU()} to go. You've got this.`;
   else msg=`💧 ${pct}% of today's goal. Small sips add up — set a glass by your desk.`;
   document.getElementById("waterMotiv").textContent=msg;renderWins();
 }
@@ -887,14 +1184,15 @@ let chart;
 function renderWeight(){
   const entries=Object.entries(DB.days).filter(([k,v])=>v.weight!=null).sort((a,b)=>a[0]<b[0]?-1:1);
   wCount.textContent=entries.length;
-  if(entries.length){const last=entries[entries.length-1];wLatest.textContent=last[1].weight+" kg";
+  var wl=document.getElementById("wInLabel");if(wl)wl.textContent="Log today's weight ("+U.wU()+")";
+  if(entries.length){const last=entries[entries.length-1];wLatest.textContent=U.wDisp(last[1].weight)+" "+U.wU();
     wLastEdit.textContent=last[1].weightTs?"Last weighed: "+when(last[1].weightTs):"";
     const wkAgo=new Date(last[0]);wkAgo.setDate(wkAgo.getDate()-7);
     const ref=entries.filter(e=>new Date(e[0])<=wkAgo).pop()||entries[0];
-    const diff=last[1].weight-ref[1].weight;wChange.textContent=(diff>0?"+":"")+diff.toFixed(1)+" kg";
+    const diff=last[1].weight-ref[1].weight;wChange.textContent=(diff>0?"+":"")+U.wDisp(diff)+" "+U.wU();
     wChange.style.color=diff>0?"var(--warn)":diff<0?"var(--accent)":"var(--text)";
   } else {wLatest.textContent="—";wChange.textContent="—";wLastEdit.textContent="";}
-  const labels=entries.map(e=>e[0].slice(5)),data=entries.map(e=>e[1].weight);
+  const labels=entries.map(e=>e[0].slice(5)),data=entries.map(e=>U.wDisp(e[1].weight));
   const ctx=document.getElementById("wChart");if(chart)chart.destroy();
   chart=new Chart(ctx,{type:"line",data:{labels,datasets:[{data,borderColor:"#5c8a57",backgroundColor:"rgba(92,138,87,.12)",fill:true,tension:.3,pointRadius:4,pointBackgroundColor:"#5e83b3"}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:"#e7e8dc"},ticks:{color:"#7d8a78"}},y:{grid:{color:"#e7e8dc"},ticks:{color:"#7d8a78"}}}}});
@@ -909,7 +1207,8 @@ function renderDate(){const t=todayStr();dateLabel.textContent=curDate===t?"Toda
 function renderProfile(){
   const p=DB.profile;
   pName.value=p.name||(META_DB.account&&META_DB.account.name!=="Guest"?META_DB.account.name:"")||"";
-  sex.value=p.sex;age.value=p.age;weight.value=p.weight;height.value=p.height;activity.value=p.activity;
+  sex.value=p.sex;age.value=p.age;weight.value=U.wDisp(p.weight);height.value=U.hDisp(p.height);activity.value=p.activity;
+  var lw=document.getElementById("lblWeight");if(lw)lw.textContent="Weight ("+U.wU()+")";var lh=document.getElementById("lblHeight");if(lh)lh.textContent="Height ("+U.hU()+")";
   dietType.value=p.dietType;allergies.value=p.allergies;dislikes.value=p.dislikes;
   wake.value=p.wake;sleep.value=p.sleep;t_breakfast.value=p.t_breakfast;t_lunch.value=p.t_lunch;t_dinner.value=p.t_dinner;
   trainDays.value=p.trainDays;routineNotes.value=p.routineNotes;
@@ -1116,7 +1415,8 @@ function renderDevices(){
 function renderAll(){
   renderDate();renderGoals();renderTargets();
   const c=calc();renderEnergy(c);renderMeals();renderWater();renderHabits();renderWeight();renderCheckins();renderWins();
-  renderProfile();renderMealsTab();renderInsights();renderCoachTab();renderDevices();
+  renderProfile();renderMealsTab();renderInsights();renderCoachTab();renderDevices();renderSettings();
+  applyLang();
 }
 
 /* ===================== HELPERS ===================== */
@@ -1127,6 +1427,102 @@ function when(iso){const d=new Date(iso),today=new Date();const same=d.toDateStr
 function clock(iso){return new Date(iso).toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"});}
 function shiftDate(n){const d=new Date(curDate+"T00:00");d.setDate(d.getDate()+n);curDate=d.toISOString().slice(0,10);renderAll();}
 let toastT;function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),1800);}
+
+
+/* ===================== GUEST IDENTITY ===================== */
+function uid(){return Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4);}
+function isGuest(){const a=META_DB.account||{};return a.guest||/^guest/.test(a.email||"");}
+function newGuest(){META_DB.account={email:"guest-"+uid(),name:"Guest",guest:true};saveMeta();boot();toast("New separate guest profile started");}
+
+/* ===================== NOTIFICATIONS ===================== */
+function notifPerm(){return (typeof Notification!=="undefined")?Notification.permission:"unsupported";}
+async function enableNotifications(){
+  if(typeof Notification==="undefined"){toast("Notifications aren't supported in this browser");return;}
+  try{const pm=await Notification.requestPermission();renderNotifState();
+    if(pm==="granted"){showNotif("🔔 NutriBoard","Reminders are on. I'll nudge you about water, movement, vitamins and meals.","welcome");toast("Notifications on ✓");}
+    else toast("Notifications "+pm);}catch(e){}
+}
+function showNotif(title,body,tag){
+  if(notifPerm()!=="granted")return false;
+  const opts={body:body,tag:tag,icon:"icon-192.png",badge:"icon-192.png",renotify:false};
+  try{if(window._swReg&&window._swReg.showNotification){window._swReg.showNotification(title,opts);}else{new Notification(title,opts);}}catch(e){try{new Notification(title,opts);}catch(_){}}
+  return true;
+}
+function reminderTick(){
+  if(!DB||notifPerm()!=="granted"||!DB.reminders)return;
+  const r=DB.reminders;r.fired=r.fired||{};
+  const nd=new Date(),hh=nd.getHours(),mm=nd.getMinutes(),today=todayStr();
+  const wake=parseInt((DB.profile.wake||"07:00").slice(0,2))||7;
+  let sleepH=parseInt((DB.profile.sleep||"23:00").slice(0,2));if(isNaN(sleepH))sleepH=23;
+  const awake = sleepH>wake ? (hh>=wake&&hh<sleepH) : (hh>=wake||hh<sleepH);
+  const d=day(today);
+  if(r.water&&awake){const every=Math.max(1,Math.min(6,+r.waterEvery||2));const slot=today+"|water|"+Math.floor(hh/every);
+    if(!r.fired[slot]&&d.water<(DB.water.target||1)){r.fired[slot]=1;save();
+      showNotif("💧 Time to hydrate","You're at "+U.vDisp(d.water)+"/"+U.vDisp(DB.water.target||0)+" "+U.vU()+". A glass now keeps your streak alive.","water");}}
+  if(r.vitamins){const vt=r.vitTime||"09:00";if(hh===(+vt.slice(0,2))&&mm<5){const slot=today+"|vit";if(!r.fired[slot]){r.fired[slot]=1;save();showNotif("💊 Vitamins time","Take your vitamins or supplements with food and a little water.","vit");}}}
+  if(r.walk){if(hh===16&&mm<5){const slot=today+"|walk";if(!r.fired[slot]){r.fired[slot]=1;save();showNotif("🚶 Time to move","Stand up, stretch, and take a short walk toward your step goal.","walk");}}}
+  if(r.meals){[["t_breakfast","Breakfast"],["t_lunch","Lunch"],["t_dinner","Dinner"]].forEach(pair=>{const k=pair[0],nm=pair[1],tt=DB.profile[k]||"";
+    if(tt&&hh===(+tt.slice(0,2))&&mm<5){const slot=today+"|meal|"+k;if(!r.fired[slot]){r.fired[slot]=1;save();const sg=suggestMeals(),m=sg.list[0];
+      showNotif("🍳 "+nm+" idea",m?(m.n+" — buy/prep "+m.fresh+". ~"+m.cal+" kcal, "+m.p+" g protein (Ciqual).") :"Open Suggested Meals for a Ciqual-based idea that fits your budget.","meal");}}});}
+  Object.keys(r.fired).forEach(k=>{if(k.indexOf(today)!==0)delete r.fired[k];});
+}
+let _remTimer;
+function startReminders(){if(_remTimer)clearInterval(_remTimer);try{reminderTick();}catch(e){}_remTimer=setInterval(function(){try{reminderTick();}catch(e){}},60000);}
+function renderNotifState(){const el=document.getElementById("notifState");if(!el)return;const pm=notifPerm();
+  el.textContent=pm==="granted"?t("notif_on"):pm==="denied"?t("notif_blocked"):t("notif_off");}
+
+/* ===================== WEATHER (Open-Meteo, no key) ===================== */
+async function fetchWeather(){
+  const p=DB.profile,q=(p.city||p.country||"").trim();if(!q){toast("Add your city or country first");return;}
+  try{
+    const g=await fetch("https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&format=json&name="+encodeURIComponent(q));
+    const gj=await g.json();
+    if(!gj.results||!gj.results.length){DB.weather={err:"not found"};save();renderWeatherBox();toast("Couldn't find that place — check spelling");return;}
+    const loc=gj.results[0];
+    const w=await fetch("https://api.open-meteo.com/v1/forecast?latitude="+loc.latitude+"&longitude="+loc.longitude+"&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m");
+    const wj=await w.json(),cur=wj.current||{};
+    DB.weather={place:loc.name+(loc.country?", "+loc.country:""),temp:cur.temperature_2m,feels:cur.apparent_temperature,hum:cur.relative_humidity_2m,code:cur.weather_code,wind:cur.wind_speed_10m,at:now()};
+    save();renderWeatherBox();renderCoachTab();toast("Weather updated ✓");
+  }catch(e){DB.weather={err:"network"};save();renderWeatherBox();toast("Weather lookup failed — try again");}
+}
+function wxEmoji(c){c=+c||0;if(c===0)return"☀️";if(c<=3)return"⛅";if(c<=48)return"🌫️";if(c<=67)return"🌧️";if(c<=77)return"🌨️";if(c<=82)return"🌦️";if(c<=86)return"🌨️";return"⛈️";}
+function weatherAdvice(){const wx=DB&&DB.weather;if(!wx||wx.err||wx.temp==null)return"";
+  if(wx.temp>=30||(wx.feels!=null&&wx.feels>=32))return "It's hot in "+wx.place+" ("+Math.round(wx.temp)+"°C, feels "+Math.round(wx.feels)+"°C). Add about 500 ml of water today and lean on water-rich foods like cucumber, tomato and salad.";
+  if(wx.hum!=null&&wx.hum>=75&&wx.temp>=24)return "It's warm and humid in "+wx.place+" ("+wx.hum+"% humidity). You'll sweat more than you notice — sip water steadily through the day.";
+  if(wx.temp!=null&&wx.temp<=5)return "It's cold in "+wx.place+" ("+Math.round(wx.temp)+"°C). Warm Ciqual meals like lentil soup are perfect, and keep drinking water even if you feel less thirsty.";
+  return "";}
+function renderWeatherBox(){const box=document.getElementById("wxBox");if(!box)return;const wx=DB&&DB.weather;
+  if(!wx){box.innerHTML="";return;}
+  if(wx.err){box.innerHTML='<p class="hint">Weather couldn\'t load ('+wx.err+'). Check the city/country spelling and try again.</p>';return;}
+  const adv=weatherAdvice();
+  box.innerHTML='<div class="wxcard"><div class="wxic">'+wxEmoji(wx.code)+'</div><div><div class="wxt">'+Math.round(wx.temp)+'°C <span style="font-size:13px;color:var(--muted)">feels '+Math.round(wx.feels)+'°C</span></div><div class="wxd">'+esc(wx.place)+' · humidity '+wx.hum+'% · wind '+Math.round(wx.wind)+' km/h</div></div></div>'+(adv?'<p class="hint">💡 '+esc(adv)+'</p>':'');
+}
+
+/* ===================== SETTINGS RENDER ===================== */
+function renderSettings(){
+  const lgGrid=document.getElementById("langGrid");
+  if(lgGrid){const langs=[["en","🇬🇧","English"],["ar","🇸🇦","العربية"],["fr","🇫🇷","Français"],["tr","🇹🇷","Türkçe"]];lgGrid.innerHTML="";
+    langs.forEach(function(L){const el=document.createElement("div");el.className="langopt"+(lang()===L[0]?" on":"");
+      el.innerHTML='<span class="fl">'+L[1]+'</span><span class="nm2">'+L[2]+'</span>';
+      el.onclick=function(){DB.profile.lang=L[0];save();applyLang();renderSettings();toast(L[2]);};lgGrid.appendChild(el);});}
+  const us=document.getElementById("unitSel");if(us){us.value=unitSys();us.onchange=function(){DB.profile.units=us.value;save();renderAll();toast("Units updated");};}
+  if(typeof setCountry!=="undefined"){setCountry.value=DB.profile.country||"";setCity.value=DB.profile.city||"";}
+  renderWeatherBox();renderNotifState();
+  const r=DB.reminders||{};
+  if(typeof remWater!=="undefined"){remWater.checked=!!r.water;remWalk.checked=!!r.walk;remVit.checked=!!r.vitamins;remMeal.checked=!!r.meals;
+    vitTime.value=r.vitTime||"09:00";waterEvery.value=r.waterEvery||2;}
+  [["remWater","water"],["remWalk","walk"],["remVit","vitamins"],["remMeal","meals"]].forEach(function(pair){var el=document.getElementById(pair[0]);if(el)el.onchange=function(){DB.reminders[pair[1]]=this.checked;save();if(this.checked&&notifPerm()!=="granted")enableNotifications();};});
+  var vt=document.getElementById("vitTime");if(vt)vt.onchange=function(){DB.reminders.vitTime=vt.value;save();};
+  var we=document.getElementById("waterEvery");if(we)we.onchange=function(){DB.reminders.waterEvery=Math.max(1,Math.min(6,+we.value||2));save();};
+  var ids=document.getElementById("identitySub");if(ids){const a=META_DB.account||{};ids.textContent=isGuest()?("Guest profile · id "+(a.email||"").replace("guest-","").slice(0,6)+" (private to this device)"):(a.name?a.name+" ("+a.email+")":"Guest");}
+}
+
+/* ===================== PWA: service worker + install ===================== */
+let _deferredPrompt=null;
+function registerSW(){if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").then(function(reg){window._swReg=reg;}).catch(function(){});}}
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();_deferredPrompt=e;var b=document.getElementById("installBar");if(b)b.classList.add("show");});
+async function doInstall(){if(_deferredPrompt){_deferredPrompt.prompt();try{await _deferredPrompt.userChoice;}catch(e){}_deferredPrompt=null;var b=document.getElementById("installBar");if(b)b.classList.remove("show");}else{toast("Open your browser menu → Install / Add to Home Screen");}}
+window.addEventListener("appinstalled",function(){var b=document.getElementById("installBar");if(b)b.classList.remove("show");toast("Installed ✓ — open NutriBoard from your home screen");});
 
 /* ===================== EVENTS ===================== */
 document.getElementById("tabs").addEventListener("click",e=>{const tab=e.target.closest(".tab");if(!tab)return;
@@ -1145,12 +1541,12 @@ function bindEvents(){
   removeGlass.onclick=()=>{day().water=Math.max(0,day().water-250);save();renderWater();};
   addHabit.onclick=()=>{const v=habitInput.value.trim();if(!v)return;DB.habitDefs.push(v);habitInput.value="";save();renderHabits();};
   habitInput.addEventListener("keydown",e=>{if(e.key==="Enter")addHabit.click();});
-  logWeight.onclick=()=>{const v=+wInput.value;if(!v){toast("Enter a weight");return;}logWeightVal(v);wInput.value="";renderAll();toast("Weight logged with date ✓");};
+  logWeight.onclick=()=>{const raw=+wInput.value;if(!raw){toast("Enter a weight");return;}logWeightVal(U.wIn(raw));wInput.value="";renderAll();toast("Weight logged with date ✓");};
   wInput.addEventListener("keydown",e=>{if(e.key==="Enter")logWeight.click();});
   saveProfile.onclick=()=>{const p=DB.profile;
     recordChange("Name",p.name,pName.value);recordChange("Sex",p.sex,sex.value);recordChange("Age",p.age,+age.value);
     recordChange("Weight",p.weight,+weight.value);recordChange("Height",p.height,+height.value);recordChange("Activity",p.activity,activity.value);
-    p.name=pName.value;p.sex=sex.value;p.age=+age.value;p.weight=+weight.value;p.height=+height.value;p.activity=+activity.value;
+    p.name=pName.value;p.sex=sex.value;p.age=+age.value;p.weight=U.wIn(+weight.value);p.height=U.hIn(+height.value);p.activity=+activity.value;
     DB.water.base=0;DB.water.target=DB.water.target||0; // recompute base next render
     save();renderAll();toast("Profile saved — targets updated");};
   savePrefs.onclick=()=>{const p=DB.profile;recordChange("Diet type",p.dietType,dietType.value);
@@ -1164,14 +1560,23 @@ function bindEvents(){
   document.getElementById("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter")sendChat();});
   document.getElementById("syncNow").onclick=()=>{DB.chat.push({role:"coach",text:coachReview(),ts:now()});DB.coach.lastHash=hashData();save();renderCoachTab();toast("Synced ✓");};
   document.getElementById("saveKey").onclick=()=>{META_DB.apiKey=apiKey.value.trim();META_DB.apiModel=apiModel.value.trim();saveMeta();renderCoachTab();toast(META_DB.apiKey?"Live AI enabled":"Key cleared — using built-in coach");};
+  var ib=document.getElementById("installBtn");if(ib)ib.onclick=doInstall;
+  var ib2=document.getElementById("installBtn2");if(ib2)ib2.onclick=doInstall;
+  var en=document.getElementById("enableNotif");if(en)en.onclick=enableNotifications;
+  var tn=document.getElementById("testNotif");if(tn)tn.onclick=function(){if(notifPerm()!=="granted"){enableNotifications();return;}showNotif("🔔 NutriBoard","Test notification — your reminders are working!","test");toast("Test sent");};
+  var sl=document.getElementById("saveLocBtn");if(sl)sl.onclick=function(){DB.profile.country=setCountry.value.trim();DB.profile.city=setCity.value.trim();save();fetchWeather();};
+  var ng=document.getElementById("newGuestBtn");if(ng)ng.onclick=newGuest;
 }
 
 /* ===================== BOOT ===================== */
 function boot(){
   DB=loadData();renderAccount();
   if(META_DB.apiKey){apiKey.value="";apiModel.value=META_DB.apiModel||"";}
+  applyLang();
   renderAll();
+  startReminders();
 }
+registerSW();
 bindEvents();
 renderAccount();
 boot();
