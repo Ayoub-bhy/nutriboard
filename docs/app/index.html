@@ -340,6 +340,25 @@
   .installbar.show{display:flex}
   .installbar .it{flex:1;font-weight:700;font-size:13.5px}
   .installbar button{background:#fff;color:#3c6b3a;border:none;border-radius:999px;padding:9px 16px;font-weight:800;cursor:pointer;font-family:inherit}
+  /* ---------- quick actions (Lovable) ---------- */
+  .qrow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+  @media(max-width:600px){.qrow{grid-template-columns:1fr 1fr}}
+  .qbtn{display:flex;align-items:center;gap:11px;padding:14px 16px;border-radius:20px;cursor:pointer;border:none;
+    font-family:inherit;font-weight:800;font-size:14.5px;color:var(--ink);transition:.16s ease;box-shadow:var(--shadow-soft);text-align:left}
+  .qbtn:hover{transform:translateY(-2px);filter:brightness(1.03)}
+  .qbtn .qic{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:17px;background:rgba(255,255,255,.55);flex-shrink:0}
+  .q-lime{background:linear-gradient(135deg,#c2f061,#9be03f)}
+  .q-blue{background:linear-gradient(135deg,#c4e8fb,#8fd3f5)}
+  .q-coral{background:linear-gradient(135deg,#ffb6b9,#ff8a90)}
+  .q-amber{background:linear-gradient(135deg,#ffe392,#ffcb52)}
+  /* ---------- weekly goal-completion bars (Lovable) ---------- */
+  .weekhead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .weekhead .wpct{font-family:var(--font-display);font-size:40px;font-weight:800;letter-spacing:-1.5px;color:var(--ink);line-height:1}
+  .weekbars{display:flex;align-items:flex-end;gap:10px;height:150px;margin-top:14px}
+  .wb{flex:1;display:flex;flex-direction:column;align-items:center;gap:9px;height:100%;justify-content:flex-end}
+  .wb .bar2{width:100%;max-width:36px;border-radius:11px 11px 5px 5px;background:linear-gradient(180deg,var(--lime),var(--lime-2));min-height:6px;transition:height .5s cubic-bezier(.2,.8,.2,1)}
+  .wb .bar2.today{background:linear-gradient(180deg,#3a3f2c,#14160d)}
+  .wb .dl{font-size:11px;color:var(--muted);font-weight:800}
 </style>
 </head>
 <body>
@@ -385,6 +404,12 @@
         <div class="wins-badges" id="wsBadges"></div>
         <div class="wins-msg" id="wsMsg"></div>
       </div>
+    </div>
+    <div class="qrow">
+      <button class="qbtn q-lime" id="qMeal"><span class="qic">🍽️</span> Log meal</button>
+      <button class="qbtn q-blue" id="qWater"><span class="qic">💧</span> +1 glass</button>
+      <button class="qbtn q-coral" id="qWorkout"><span class="qic">🏃</span> Workout</button>
+      <button class="qbtn q-amber" id="qSleep"><span class="qic">😴</span> Sleep</button>
     </div>
     <div class="grid">
       <section class="card col-5">
@@ -461,6 +486,14 @@
         <div class="lastedit" id="wLastEdit"></div>
         <div class="chartbox"><canvas id="wChart"></canvas></div>
         <div class="summary-row"><span class="pill">Latest: <b id="wLatest">—</b></span><span class="pill">7-day: <b id="wChange">—</b></span><span class="pill">Entries: <b id="wCount">0</b></span></div>
+      </section>
+
+      <section class="card col-12">
+        <div class="weekhead">
+          <div><h2 style="margin-bottom:2px">📅 This week</h2><div class="hint" style="margin-top:0">Goal completion % — share of each day's goals you hit</div></div>
+          <div class="wpct" id="weekPct">0%</div>
+        </div>
+        <div class="weekbars" id="weekBars"></div>
       </section>
 
       <section class="card col-12">
@@ -1441,7 +1474,7 @@ function renderDevices(){
 }
 function renderAll(){
   renderDate();renderGoals();renderTargets();
-  const c=calc();renderEnergy(c);renderMeals();renderWater();renderHabits();renderWeight();renderCheckins();renderWins();
+  const c=calc();renderEnergy(c);renderMeals();renderWater();renderHabits();renderWeight();renderCheckins();renderWins();renderWeekBars();
   renderProfile();renderMealsTab();renderInsights();renderCoachTab();renderDevices();renderSettings();
   applyLang();
 }
@@ -1566,6 +1599,34 @@ function deleteMyData(){
 async function doInstall(){if(_deferredPrompt){_deferredPrompt.prompt();try{await _deferredPrompt.userChoice;}catch(e){}_deferredPrompt=null;var b=document.getElementById("installBar");if(b)b.classList.remove("show");}else{toast("Open your browser menu → Install / Add to Home Screen");}}
 window.addEventListener("appinstalled",function(){var b=document.getElementById("installBar");if(b)b.classList.remove("show");toast("Installed ✓ — open NutriBoard from your home screen");});
 
+/* ===================== QUICK ACTIONS + WEEKLY BARS ===================== */
+function switchTab(v){var t=document.querySelector('.tab[data-v="'+v+'"]');if(t)t.click();}
+function dayScore(dt){
+  var d=DB.days[dt];if(!d)return 0;
+  var c=calc(),t=dayTotals(d),wt=DB.water.target||1;
+  var checks=[
+    d.meals.length>0,
+    t.pro>=c.proG*0.9,
+    t.cal>0 && t.cal<=c.target*1.1,
+    d.water>=wt,
+    DB.habitDefs.length>0 && DB.habitDefs.every(function(n){return d.habits[n];})
+  ];
+  return Math.round(checks.filter(Boolean).length/checks.length*100);
+}
+function renderWeekBars(){
+  var el=document.getElementById("weekBars");if(!el)return;
+  var dates=last7(),today=todayStr(),letters=["S","M","T","W","T","F","S"],sum=0;
+  el.innerHTML="";
+  dates.forEach(function(dt){
+    var sc=dayScore(dt);sum+=sc;
+    var L=letters[new Date(dt+"T00:00").getDay()];
+    var wb=document.createElement("div");wb.className="wb";
+    wb.innerHTML='<div class="bar2'+(dt===today?" today":"")+'" style="height:'+Math.max(6,sc)+'%"></div><div class="dl">'+L+'</div>';
+    el.appendChild(wb);
+  });
+  var pe=document.getElementById("weekPct");if(pe)pe.textContent=Math.round(sum/dates.length)+"%";
+}
+
 /* ===================== EVENTS ===================== */
 document.getElementById("tabs").addEventListener("click",e=>{const tab=e.target.closest(".tab");if(!tab)return;
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("on"));tab.classList.add("on");
@@ -1610,6 +1671,10 @@ function bindEvents(){
   var ng=document.getElementById("newGuestBtn");if(ng)ng.onclick=newGuest;
   var eb=document.getElementById("exportBtn");if(eb)eb.onclick=exportData;
   var db2=document.getElementById("deleteBtn");if(db2)db2.onclick=deleteMyData;
+  var qm=document.getElementById("qMeal");if(qm)qm.onclick=function(){var i=document.getElementById("mName");if(i){i.scrollIntoView({behavior:"smooth",block:"center"});i.focus();}};
+  var qw=document.getElementById("qWater");if(qw)qw.onclick=function(){day().water+=250;save();renderWater();renderCoachTab();renderWeekBars();toast("+250 ml logged 💧");};
+  var qk=document.getElementById("qWorkout");if(qk)qk.onclick=function(){switchTab("devices");setTimeout(function(){var a=document.getElementById("aKcal");if(a){a.scrollIntoView({behavior:"smooth",block:"center"});a.focus();}},80);};
+  var qs=document.getElementById("qSleep");if(qs)qs.onclick=function(){switchTab("devices");setTimeout(function(){var a=document.getElementById("aSleep");if(a){a.scrollIntoView({behavior:"smooth",block:"center"});a.focus();}},80);};
 }
 
 /* ===================== BOOT ===================== */
