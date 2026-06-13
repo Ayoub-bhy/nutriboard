@@ -672,11 +672,21 @@
         <div class="setrow" style="margin-top:8px"><div><div class="lbl">📲 <span data-i18n="set_install">Install as an app</span></div><div class="sub" data-i18n="set_install_sub">Add NutriBoard to your home screen or desktop so it opens like a real app and can send reminders.</div></div>
           <button class="btn sm" id="installBtn2" data-i18n="install_btn">Install app</button></div>
       </section>
+
+      <section class="card col-12">
+        <h2>🔒 <span data-i18n="set_privacy">Privacy &amp; your data</span></h2>
+        <p class="hint" style="margin-top:0" data-i18n="set_privacy_sub">Your data is stored privately in this browser, separated per person. You are always in control: download a full copy whenever you want, or permanently erase everything for this profile on this device. Nothing is sold or shared, and there are no ads.</p>
+        <div class="notifbtn-row" style="margin-top:6px">
+          <button class="btn sm" id="exportBtn" data-i18n="set_export">⬇️ Export my data (JSON)</button>
+          <button class="btn ghost sm" id="deleteBtn" data-i18n="set_delete" style="color:var(--bad);border-color:rgba(217,106,82,.4)">🗑️ Delete my data</button>
+        </div>
+        <p class="hint" data-i18n="set_privacy_note">Food calories and macros are representative entries from the ANSES-CIQUAL database and may differ slightly from a specific brand or recipe. NutriBoard gives educational estimates, not medical advice.</p>
+      </section>
     </div>
   </div>
 
   <p class="hint" style="text-align:center;margin-top:24px">
-    Targets use the Mifflin-St Jeor equation — educational estimates, not medical advice. Data is saved privately in this browser per signed-in account.
+    Targets use the Mifflin-St Jeor equation. Food values are representative entries from the ANSES-CIQUAL database and may differ slightly from a specific brand or recipe. NutriBoard gives educational estimates, not medical advice. Data is saved privately in this browser, separated per signed-in account or guest.
   </p>
 </div>
 
@@ -1521,6 +1531,21 @@ function renderSettings(){
 let _deferredPrompt=null;
 function registerSW(){if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").then(function(reg){window._swReg=reg;}).catch(function(){});}}
 window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();_deferredPrompt=e;var b=document.getElementById("installBar");if(b)b.classList.add("show");});
+function exportData(){
+  try{
+    const payload={app:"NutriBoard",account:accountId(),exportedAt:now(),data:DB};
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+    a.download="nutriboard-"+String(accountId()).replace(/[^a-z0-9]/gi,"_")+"-"+todayStr()+".json";
+    document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},0);
+    toast("Your data was exported ✓");
+  }catch(e){toast("Export failed");}
+}
+function deleteMyData(){
+  if(!confirm("Delete ALL NutriBoard data for this profile on this device? This cannot be undone.\n\nTip: export a copy first."))return;
+  try{localStorage.removeItem(dataKey());}catch(e){}
+  DB=freshDB();save();applyLang();renderAll();toast("Your data was deleted");
+}
 async function doInstall(){if(_deferredPrompt){_deferredPrompt.prompt();try{await _deferredPrompt.userChoice;}catch(e){}_deferredPrompt=null;var b=document.getElementById("installBar");if(b)b.classList.remove("show");}else{toast("Open your browser menu → Install / Add to Home Screen");}}
 window.addEventListener("appinstalled",function(){var b=document.getElementById("installBar");if(b)b.classList.remove("show");toast("Installed ✓ — open NutriBoard from your home screen");});
 
@@ -1566,6 +1591,8 @@ function bindEvents(){
   var tn=document.getElementById("testNotif");if(tn)tn.onclick=function(){if(notifPerm()!=="granted"){enableNotifications();return;}showNotif("🔔 NutriBoard","Test notification — your reminders are working!","test");toast("Test sent");};
   var sl=document.getElementById("saveLocBtn");if(sl)sl.onclick=function(){DB.profile.country=setCountry.value.trim();DB.profile.city=setCity.value.trim();save();fetchWeather();};
   var ng=document.getElementById("newGuestBtn");if(ng)ng.onclick=newGuest;
+  var eb=document.getElementById("exportBtn");if(eb)eb.onclick=exportData;
+  var db2=document.getElementById("deleteBtn");if(db2)db2.onclick=deleteMyData;
 }
 
 /* ===================== BOOT ===================== */
