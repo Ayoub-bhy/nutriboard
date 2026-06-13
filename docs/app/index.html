@@ -422,7 +422,7 @@
 
       <section class="card col-8">
         <h2>🍽️ Meal Log</h2>
-        <p class="hint" style="margin-top:0">Write down everything you eat and drink as you go. Type the food, choose breakfast/lunch/dinner/snack, then add its calories and grams of protein (P), carbs (C) and fat (F). Not sure of the numbers? Open <b>Suggested Meals</b> and tap “Add” — it fills them in from the Ciqual food database for you.</p>
+        <p class="hint" style="margin-top:0">Write down everything you eat and drink as you go. Type the food, choose breakfast/lunch/dinner/snack, then add its calories and grams of protein (P), carbs (C) and fat (F). Not sure of the numbers? Open <b>Suggested Meals</b> and tap “Add” — it fills them in from our built-in food table for you. Those numbers are approximate reference values — see the honesty note at the very bottom of the page.</p>
         <div class="meal-form">
           <div><label>Food / meal</label><input id="mName" placeholder="e.g. Grilled chicken & rice"></div>
           <div><label>Type</label><select id="mType"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option></select></div>
@@ -478,7 +478,7 @@
     <div class="grid">
       <section class="card col-8">
         <h2>💬 Your Nutrition Coach <span class="r" id="coachMode">built-in coach</span></h2>
-        <p class="hint" style="margin-top:0">Your coach reads your logs, profile and today's numbers before answering, and only uses the official ANSES-Ciqual food database for calories and macros. Tell it what you ate, your weight, your allergies or how you feel — it will confirm your details, keep foods you can't eat out of every suggestion, and give amounts in both raw (to buy) and cooked (to eat) grams.</p>
+        <p class="hint" style="margin-top:0"><b>What this coach is:</b> a simple rule-based assistant (keyword matching), <b>not</b> a live AI and <b>not</b> a dietitian. It reads your logs and profile, keeps foods in your allergies/dislikes out of suggestions, and gives raw (to buy) and cooked (to eat) grams. Its food numbers are approximate reference values, not the official CIQUAL dataset. For a real AI reply, add your own Anthropic API key on the right.</p>
         <div class="sync no" id="syncBar"><span class="badge"></span><span id="syncText">Checking…</span>
           <button class="btn sm" id="syncNow" style="margin-left:auto">Sync now</button></div>
         <div class="chat">
@@ -505,7 +505,7 @@
     <div class="grid">
       <section class="card col-12">
         <h2>🍳 Today's Suggested Meals <span class="r" id="sugBasis"></span></h2>
-        <p class="hint" style="margin-top:0">These meals are built from your goal, what's left in today's calorie budget, and your diet preferences. Anything in your <b>allergies or dislikes</b> is automatically left out. Each card shows the <b>raw weight to buy/prepare</b> 🛒 and the <b>cooked</b> calories and macros (from the Ciqual database). Tap “Add” to log it instantly.</p>
+        <p class="hint" style="margin-top:0">These meals are built from your goal, what's left in today's calorie budget, and your diet preferences. Anything in your <b>allergies or dislikes</b> is automatically left out. Each card shows the <b>raw weight to buy/prepare</b> 🛒 and the <b>cooked</b> calories and macros. Those macros are <b>approximate per-100 g reference values, not the official ANSES-CIQUAL dataset</b> — fine for everyday tracking, but verify against ciqual.fr or a label if precision matters. Tap “Add” to log it instantly.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0">
           <button class="btn ghost sm" id="sugRefresh">↻ Refresh suggestions</button>
           <span class="pill">Remaining: <b id="sugRemCal">0</b> kcal</span>
@@ -580,7 +580,7 @@
     <div class="grid">
       <section class="card col-7">
         <h2>⌚ Connected Devices <span class="r">sync activity to sharpen your targets</span></h2>
-        <p class="hint" style="margin-top:0">Connect a wearable or health platform and NutriBoard pulls in your steps, active calories, sleep and heart rate — then adjusts your daily budget so you can eat back what you burn.</p>
+        <p class="hint" style="margin-top:0"><b>Note:</b> in this free browser-only version these provider buttons are a <b>demo</b> — they don't actually connect Fitbit/Garmin/etc. Real OAuth device sync runs on the hosted backend (not yet deployed). What <b>does</b> work right now is live phone/laptop sensors below (Bluetooth heart-rate, motion step counter, GPS walk) and manually entering today's activity.</p>
         <div class="devgrid" id="deviceGrid"></div>
         <p class="hint">Live sync uses each provider's OAuth API (Fitbit, Garmin, Oura, Whoop, Strava, Withings) or Google Health Connect; Apple Watch syncs through Apple Health. A unified API such as Terra or the open-source Open Wearables can connect 500+ devices at once — enabled on the hosted version.</p>
       </section>
@@ -686,7 +686,7 @@
   </div>
 
   <p class="hint" style="text-align:center;margin-top:24px">
-    Targets use the Mifflin-St Jeor equation. Food values are representative entries from the ANSES-CIQUAL database and may differ slightly from a specific brand or recipe. NutriBoard gives educational estimates, not medical advice. Data is saved privately in this browser, separated per signed-in account or guest.
+    Honesty note: calorie targets use the Mifflin-St Jeor equation — an estimate, not a measurement. Food calories and macros are <b>approximate per-100 g reference values compiled from common food-composition data; they are NOT the official ANSES-CIQUAL dataset</b> and can differ from a specific brand, recipe or the exact CIQUAL entry — check ciqual.fr or the product label for anything that matters. NutriBoard is an educational tool, not medical or dietetic advice. Your data is stored only in this browser (nothing is sent to a server), separated per account or guest.
   </p>
 </div>
 
@@ -702,7 +702,7 @@ const I18N={
   tab_insights:"💡 Insights & Advice",tab_devices:"⌚ Devices",tab_settings:"⚙️ Settings",
   install_text:"Install NutriBoard on your phone or laptop — works offline and sends you reminders.",install_btn:"Install app",
   set_language:"Language",set_language_sub:"Choose the language for the whole app. Arabic switches the layout to right-to-left. Your choice is saved to your account.",
-  set_units:"Measurement units",set_units_sub:"Pick how body weight, height and water are shown. Metric uses kilograms, centimetres and millilitres. Imperial uses pounds, inches and fluid ounces. Food gram amounts always follow the Ciqual database.",
+  set_units:"Measurement units",set_units_sub:"Pick how body weight, height and water are shown. Metric uses kilograms, centimetres and millilitres. Imperial uses pounds, inches and fluid ounces. Food gram amounts use our built-in approximate reference values.",
   set_unit_system:"Unit system",set_country_h:"Where you live",set_country_sub:"Your city and country let the coach check today's local weather and remind you to drink more when it is hot or humid.",
   set_country:"Country",set_city:"City",set_save_loc:"Save & check weather",
   set_reminders:"Smart reminders",set_reminders_sub:"NutriBoard can send you friendly notifications on this device — your phone or laptop — to drink water, move your body, take your vitamins, and check today's meal suggestions. Turn on notifications first, then choose what you want to be reminded about.",
@@ -720,7 +720,7 @@ const I18N={
   set_privacy:"Privacy & your data",
   set_privacy_sub:"Your data is stored privately in this browser, separated per person. You are always in control: download a full copy whenever you want, or permanently erase everything for this profile on this device. Nothing is sold or shared, and there are no ads.",
   set_export:"⬇️ Export my data (JSON)",set_delete:"🗑️ Delete my data",
-  set_privacy_note:"Food calories and macros are representative entries from the ANSES-CIQUAL database and may differ slightly from a specific brand or recipe. NutriBoard gives educational estimates, not medical advice."
+  set_privacy_note:"Food calories and macros are APPROXIMATE per-100 g reference values, not the official ANSES-CIQUAL dataset — they can differ from a specific brand, recipe or the exact CIQUAL entry. Check ciqual.fr or the label for anything precise. NutriBoard is educational, not medical or dietetic advice."
  },
  ar:{
   tab_today:"📊 اليوم",tab_coach:"💬 المدرب",tab_meals:"🍳 وجبات مقترحة",tab_profile:"👤 الملف والروتين",
@@ -745,7 +745,7 @@ const I18N={
   set_privacy:"الخصوصية وبياناتك",
   set_privacy_sub:"تُحفظ بياناتك بشكل خاص في هذا المتصفح، منفصلة لكل شخص. أنت دائماً المتحكم: نزّل نسخة كاملة وقتما شئت، أو امحُ كل شيء نهائياً لهذا الملف على هذا الجهاز. لا شيء يُباع أو يُشارك ولا توجد إعلانات.",
   set_export:"⬇️ تصدير بياناتي (JSON)",set_delete:"🗑️ حذف بياناتي",
-  set_privacy_note:"سعرات وماكروز الطعام قيم تمثيلية من قاعدة بيانات ANSES-CIQUAL وقد تختلف قليلاً عن علامة أو وصفة محددة. نيوتري بورد يقدّم تقديرات تعليمية وليست نصيحة طبية."
+  set_privacy_note:"سعرات وماكروز الطعام قيم تقريبية لكل 100 غ وليست بيانات ANSES-CIQUAL الرسمية — وقد تختلف عن علامة أو وصفة محددة أو عن إدخال CIQUAL الدقيق. تحقّق من ciqual.fr أو الملصق لأي قيمة دقيقة. نيوتري بورد أداة تعليمية وليست نصيحة طبية أو غذائية."
  },
  fr:{
   tab_today:"📊 Aujourd'hui",tab_coach:"💬 Coach",tab_meals:"🍳 Repas suggérés",tab_profile:"👤 Profil & routine",
@@ -770,7 +770,7 @@ const I18N={
   set_privacy:"Confidentialité & vos données",
   set_privacy_sub:"Vos données sont stockées en privé dans ce navigateur, séparées par personne. Vous gardez le contrôle : téléchargez une copie complète quand vous voulez, ou effacez définitivement tout pour ce profil sur cet appareil. Rien n'est vendu ni partagé, et il n'y a pas de publicité.",
   set_export:"⬇️ Exporter mes données (JSON)",set_delete:"🗑️ Supprimer mes données",
-  set_privacy_note:"Les calories et macros des aliments sont des entrées représentatives de la base ANSES-CIQUAL et peuvent différer légèrement d'une marque ou recette précise. NutriBoard fournit des estimations éducatives, pas un avis médical."
+  set_privacy_note:"Les calories et macros sont des valeurs de référence APPROXIMATIVES pour 100 g, pas les données officielles ANSES-CIQUAL — elles peuvent différer d'une marque, recette ou de l'entrée CIQUAL exacte. Vérifiez ciqual.fr ou l'étiquette pour toute précision. NutriBoard est éducatif, pas un avis médical ou diététique."
  },
  tr:{
   tab_today:"📊 Bugün",tab_coach:"💬 Koç",tab_meals:"🍳 Önerilen Öğünler",tab_profile:"👤 Profil & Rutin",
@@ -795,7 +795,7 @@ const I18N={
   set_privacy:"Gizlilik & verileriniz",
   set_privacy_sub:"Verileriniz bu tarayıcıda özel olarak, kişi başına ayrı saklanır. Kontrol her zaman sizde: istediğiniz zaman tam bir kopya indirin veya bu cihazdaki bu profile ait her şeyi kalıcı olarak silin. Hiçbir şey satılmaz veya paylaşılmaz, reklam yoktur.",
   set_export:"⬇️ Verilerimi dışa aktar (JSON)",set_delete:"🗑️ Verilerimi sil",
-  set_privacy_note:"Yiyecek kalori ve makroları ANSES-CIQUAL veritabanından temsili değerlerdir ve belirli bir marka veya tariften biraz farklı olabilir. NutriBoard tıbbi tavsiye değil, eğitim amaçlı tahminler sunar."
+  set_privacy_note:"Yiyecek kalori ve makroları 100 g başına YAKLAŞIK referans değerlerdir, resmi ANSES-CIQUAL verisi değildir — belirli bir marka, tarif veya tam CIQUAL kaydından farklı olabilir. Hassas değer için ciqual.fr veya etikete bakın. NutriBoard eğitseldir, tıbbi/diyetetik tavsiye değildir."
  }
 };
 function lang(){return (DB&&DB.profile&&DB.profile.lang)||"en";}
@@ -903,8 +903,8 @@ function last7(){const a=[];for(let i=6;i>=0;i--){const d=new Date(curDate);d.se
 
 /* ===================== MEAL SUGGESTION ENGINE ===================== */
 const CIQUAL={
-  // key:[name, kcal, protein, carb, fat, yield]  per 100 g — ANSES-CIQUAL (cooked/prepared); yield = cooked weight ÷ raw weight
-  yogurt:["Greek yogurt, plain",60,10,3.6,0.4,1], berries:["mixed berries",57,0.7,12,0.3,1], honey:["honey",304,0.3,82,0,1],
+  // key:[name, kcal, protein, carb, fat, yield] per 100 g. APPROXIMATE reference values (USDA/CIQUAL-style), hand-compiled — NOT the official CIQUAL dataset. yield = cooked weight ÷ raw weight
+  yogurt:["Greek yogurt, plain (low-fat)",60,10,3.6,0.4,1], berries:["mixed berries",57,0.7,12,0.3,1], honey:["honey",304,0.3,82,0,1],
   egg:["egg, cooked",155,13,1.1,11,1], greens:["mixed leaf salad",17,1.4,2.5,0.3,1], oats:["oat porridge, cooked",71,2.5,12,1.5,5],
   whey:["whey protein powder",373,80,8,6,1], banana:["banana",93,1.1,20,0.3,1], tofu:["tofu, cooked",120,12,1.5,7,1],
   avocado:["avocado",169,1.8,3,15,1], chicken:["chicken breast, cooked",163,31,0,3.6,0.75], rice:["white rice, cooked",130,2.8,28,0.4,2.7],
@@ -1084,8 +1084,8 @@ function coachReply(text){
   }
   // intents
   if(low.includes("water")||low.includes("hydrat")){const d=day();const wa=weatherAdvice();return `You're at ${U.vDisp(d.water)}/${U.vDisp(DB.water.target)} ${U.vU()}. ${d.water>=DB.water.target?"Goal hit — nice. Your streak is "+DB.water.streak+" day(s). I'll nudge the target up as you stay consistent.":"Add "+U.vDisp(Math.max(0,DB.water.target-d.water))+" "+U.vU()+" more to hit today's goal."}${wa?" "+wa:""}`;}
-  if(low.includes("protein")){const t=dayTotals(),c=calc();return `Protein: ${Math.round(t.pro)}/${c.proG}g. ${t.pro>=c.proG?"Target met 💪":"Aim for "+Math.round((c.proG-t.pro))+"g more — e.g. 100 g cooked chicken breast ≈ 31 g, 150 g cooked lentils ≈ 14 g, 30 g whey ≈ 24 g (Ciqual)."}`;}
-  if(low.includes("suggest")||low.includes("what should i eat")||low.includes("meal")){const sg=suggestMeals();const top=sg.list.slice(0,2).map(m=>`${m.n} → buy/prep ${m.fresh} → cooked ${m.comp} ≈ ${m.cal} kcal, ${m.p}g protein`).join("  •  ");return `With ~${sg.remCal} kcal and ${sg.remPro}g protein left (Ciqual):  ${top}.  Buy the raw amounts; macros are for the cooked meal. Open Suggested Meals to add.`;}
+  if(low.includes("protein")){const t=dayTotals(),c=calc();return `Protein: ${Math.round(t.pro)}/${c.proG}g. ${t.pro>=c.proG?"Target met 💪":"Aim for "+Math.round((c.proG-t.pro))+"g more — e.g. 100 g cooked chicken breast ≈ 31 g, 150 g cooked lentils ≈ 14 g, 30 g whey ≈ 24 g (approximate values)."}`;}
+  if(low.includes("suggest")||low.includes("what should i eat")||low.includes("meal")){const sg=suggestMeals();const top=sg.list.slice(0,2).map(m=>`${m.n} → buy/prep ${m.fresh} → cooked ${m.comp} ≈ ${m.cal} kcal, ${m.p}g protein`).join("  •  ");return `With ~${sg.remCal} kcal and ${sg.remPro}g protein left (approx. values):  ${top}.  Buy the raw amounts; macros are for the cooked meal. Open Suggested Meals to add.`;}
   {const wm=low.match(/(\d{2,3}(?:\.\d)?)\s?kg/)||(low.includes("weigh")?low.match(/(\d{2,3}(?:\.\d)?)/):null);if(wm){const v=parseFloat(wm[1]);if(v>=30&&v<=300){logWeightVal(v);return `Logged ${v}kg with today's date ✓ I'll track the trend. ${learned.length?"Also noted: "+learned.join(", ")+".":""}`;}}}
   if(low.includes("tired")||low.includes("low energy")||low.includes("exhausted"))return "Low energy often means under-eating carbs, poor sleep, or dehydration. How's your sleep and water today? If you're in a deep deficit, a refeed day can help.";
   if(low.includes("hungry")||low.includes("craving"))return "Cravings usually = not enough protein, fiber, or sleep. Try a high-volume, high-protein snack (Greek yogurt, edamame, eggs). Want me to suggest one?";
@@ -1100,7 +1100,7 @@ function logWeightVal(v){const d=day();const old=d.weight;d.weight=v;d.weightTs=
 
 async function aiReply(text){
   const key=META_DB.apiKey, model=META_DB.apiModel||"claude-haiku-4-5-20251001";
-  const sys="You are a professional registered nutritionist inside a tracking app. STRICT RULES: (1) Use the ANSES-CIQUAL table (ciqual.fr) as your ONLY source for food macronutrients (energy, protein, carbohydrate, fat per 100 g); never use any other database. (2) Before answering any food/meal question, work out the relevant Ciqual foods and their per-100 g values, using the cooked/prepared version. (3) EVERY meal or food recommendation MUST list each ingredient with an explicit COOKED gram quantity and the resulting macros, e.g. '120 g cooked chicken breast + 150 g cooked white rice + 90 g broccoli \u2248 ~430 kcal, ~42 g protein (Ciqual)'. (4) ALSO give the RAW/fresh weight to buy or prepare for each ingredient (using typical cooking yields) and clearly state the macros are for the COOKED meal, e.g. 'buy ~160 g raw chicken breast \u2192 120 g cooked'. (5) Only discuss nutrition, diet and food \u2014 politely decline anything else. Be concise and personalise using the client data snapshot. No medical diagnoses.";
+  const sys="You are a nutrition assistant inside a tracking app. You are NOT a registered dietitian and must never claim to be; you give general educational information, not medical or dietetic advice, and no diagnoses. RULES: (1) Use widely-accepted per-100 g food-composition values (USDA/CIQUAL-style) and state clearly that they are APPROXIMATE and not the official CIQUAL dataset; suggest the user verify on ciqual.fr or the product label when precision matters. (2) Work out per-100 g values for the cooked/prepared food before answering. (3) EVERY meal or food recommendation MUST list each ingredient with an explicit COOKED gram quantity and the resulting approximate macros, e.g. '120 g cooked chicken breast + 150 g cooked white rice + 90 g broccoli \u2248 ~430 kcal, ~42 g protein (approx.)'. (4) ALSO give the RAW/fresh weight to buy or prepare for each ingredient (using typical cooking yields) and state the macros are for the COOKED meal, e.g. 'buy ~160 g raw chicken breast \u2192 120 g cooked'. (5) Only discuss nutrition, diet and food \u2014 politely decline anything else. Be concise and personalise using the client data snapshot.";
   const msgs=DB.chat.slice(-10).map(m=>({role:m.role==="user"?"user":"assistant",content:m.text}));
   msgs.push({role:"user",content:`My current data: ${JSON.stringify(dataSnapshot())}\n\nMessage: ${text}`});
   const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",
@@ -1252,12 +1252,12 @@ function renderHistory(){
 function renderMealsTab(){
   const sg=suggestMeals();
   sugRemCal.textContent=sg.remCal;sugRemPro.textContent=sg.remPro;sugDiet.textContent=DB.profile.dietType;
-  sugBasis.textContent=(DB.coach.prefsLearned.length?"using: "+DB.coach.prefsLearned.join(", "):"using your profile")+" · macros/100g from Ciqual · cooked weights";
+  sugBasis.textContent=(DB.coach.prefsLearned.length?"using: "+DB.coach.prefsLearned.join(", "):"using your profile")+" · approx. per-100g values (not official CIQUAL) · cooked weights";
   const box=document.getElementById("sugList");box.innerHTML="";
   if(!sg.list.length){box.innerHTML='<p class="empty">No suggestions fit your filters — try relaxing diet/allergy settings.</p>';return;}
   sg.list.forEach(m=>{const el=document.createElement("div");el.className="sugcard";
     el.innerHTML=`<div class="nm">${esc(m.n)}</div><div class="meta">${m.type} • ${m.cal} kcal</div>
-      <div class="comp">🛒 ${esc(m.fresh)} <span class="finfo">ⓘ<span class="fpop"><b>Buy / prepare</b> the raw amounts above. The calories &amp; macros are for the <b>cooked</b> meal: ${esc(m.comp)}. Macros per 100 g from Ciqual.</span></span></div>
+      <div class="comp">🛒 ${esc(m.fresh)} <span class="finfo">ⓘ<span class="fpop"><b>Buy / prepare</b> the raw amounts above. The calories &amp; macros are for the <b>cooked</b> meal: ${esc(m.comp)}. Macros are approximate per-100 g reference values (not the official CIQUAL dataset).</span></span></div>
       <div class="mac"><span>P ${m.p}g</span><span>C ${m.c}g</span><span>F ${m.f}g</span><span style="background:rgba(92,138,87,.10);border-color:rgba(92,138,87,.2);color:var(--accent)">cooked target</span></div>
       <button class="btn sm">+ Add to today's log</button>`;
     el.querySelector("button").onclick=()=>{day().meals.push({name:m.n,type:m.type,cal:m.cal,pro:m.p,carb:m.c,fat:m.f,ts:now()});save();renderAll();toast("Added "+m.n);};
@@ -1424,8 +1424,8 @@ function renderDevices(){
   DEVICES.forEach(dv=>{
     const on=!!(DB.devices&&DB.devices[dv.id]);
     const el=document.createElement("div");el.className="devcard"+(on?" on":"");
-    el.innerHTML='<div class="dvtop"><span class="dvic">'+dv.ic+'</span><div><div class="dvname">'+dv.name+'</div><div class="dvmethod">'+dv.method+'</div></div>'+(on?'<span class="dvbadge">Connected</span>':'')+'</div><div class="dvsyncs">Syncs: '+dv.syncs+'</div><button class="btn '+(on?'ghost ':'')+'sm">'+(on?'Disconnect':'Connect')+'</button>';
-    el.querySelector("button").onclick=()=>{DB.devices=DB.devices||{};if(on){delete DB.devices[dv.id];}else{DB.devices[dv.id]={at:now()};recordChange("Device connected","",dv.name);}save();renderDevices();toast(on?dv.name+" disconnected":dv.name+" connected ✓");};
+    el.innerHTML='<div class="dvtop"><span class="dvic">'+dv.ic+'</span><div><div class="dvname">'+dv.name+'</div><div class="dvmethod">'+dv.method+'</div></div>'+(on?'<span class="dvbadge">Demo</span>':'')+'</div><div class="dvsyncs">Syncs: '+dv.syncs+'</div><button class="btn '+(on?'ghost ':'')+'sm">'+(on?'Disconnect':'Connect')+'</button>';
+    el.querySelector("button").onclick=()=>{DB.devices=DB.devices||{};if(on){delete DB.devices[dv.id];}else{DB.devices[dv.id]={at:now()};recordChange("Device connected","",dv.name);}save();renderDevices();toast(on?dv.name+" removed":"Demo only — real "+dv.name+" sync needs the hosted backend (this browser-only version can't connect it).");};
     grid.appendChild(el);
   });
   const a=day().activity;
@@ -1489,7 +1489,7 @@ function reminderTick(){
   if(r.walk){if(hh===16&&mm<5){const slot=today+"|walk";if(!r.fired[slot]){r.fired[slot]=1;save();showNotif("🚶 Time to move","Stand up, stretch, and take a short walk toward your step goal.","walk");}}}
   if(r.meals){[["t_breakfast","Breakfast"],["t_lunch","Lunch"],["t_dinner","Dinner"]].forEach(pair=>{const k=pair[0],nm=pair[1],tt=DB.profile[k]||"";
     if(tt&&hh===(+tt.slice(0,2))&&mm<5){const slot=today+"|meal|"+k;if(!r.fired[slot]){r.fired[slot]=1;save();const sg=suggestMeals(),m=sg.list[0];
-      showNotif("🍳 "+nm+" idea",m?(m.n+" — buy/prep "+m.fresh+". ~"+m.cal+" kcal, "+m.p+" g protein (Ciqual).") :"Open Suggested Meals for a Ciqual-based idea that fits your budget.","meal");}}});}
+      showNotif("🍳 "+nm+" idea",m?(m.n+" — buy/prep "+m.fresh+". ~"+m.cal+" kcal, "+m.p+" g protein (approx.).") :"Open Suggested Meals for an idea that fits your budget.","meal");}}});}
   Object.keys(r.fired).forEach(k=>{if(k.indexOf(today)!==0)delete r.fired[k];});
 }
 let _remTimer;
@@ -1515,7 +1515,7 @@ function wxEmoji(c){c=+c||0;if(c===0)return"☀️";if(c<=3)return"⛅";if(c<=48
 function weatherAdvice(){const wx=DB&&DB.weather;if(!wx||wx.err||wx.temp==null)return"";
   if(wx.temp>=30||(wx.feels!=null&&wx.feels>=32))return "It's hot in "+wx.place+" ("+Math.round(wx.temp)+"°C, feels "+Math.round(wx.feels)+"°C). Add about 500 ml of water today and lean on water-rich foods like cucumber, tomato and salad.";
   if(wx.hum!=null&&wx.hum>=75&&wx.temp>=24)return "It's warm and humid in "+wx.place+" ("+wx.hum+"% humidity). You'll sweat more than you notice — sip water steadily through the day.";
-  if(wx.temp!=null&&wx.temp<=5)return "It's cold in "+wx.place+" ("+Math.round(wx.temp)+"°C). Warm Ciqual meals like lentil soup are perfect, and keep drinking water even if you feel less thirsty.";
+  if(wx.temp!=null&&wx.temp<=5)return "It's cold in "+wx.place+" ("+Math.round(wx.temp)+"°C). Warm meals like lentil soup are perfect, and keep drinking water even if you feel less thirsty.";
   return "";}
 function renderWeatherBox(){const box=document.getElementById("wxBox");if(!box)return;const wx=DB&&DB.weather;
   if(!wx){box.innerHTML="";return;}
