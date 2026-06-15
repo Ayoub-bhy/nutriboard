@@ -42,7 +42,7 @@
       var(--bg);
     background-attachment:fixed;
   }
-  .wrap{max-width:1180px;margin:0 auto;padding:26px 22px 56px}
+  .wrap{max-width:1180px;margin:0 auto;padding:26px 22px 120px}
   a{color:var(--accent);text-decoration:none;font-weight:700}
   a:hover{text-decoration:underline}
   ::selection{background:rgba(156,190,90,.35)}
@@ -241,9 +241,9 @@
     border-radius:14px;padding:15px;font-size:13.5px;margin-top:16px;font-weight:600;color:#3c4d3a}
 
   /* ---------- toast ---------- */
-  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(90px);
+  .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(90px);
     background:linear-gradient(150deg,var(--accent),var(--accent-2));color:#fff;padding:13px 24px;border-radius:999px;
-    font-weight:800;box-shadow:0 16px 30px -12px rgba(92,138,87,.7);transition:.4s cubic-bezier(.2,.8,.2,1);opacity:0;z-index:99}
+    font-weight:800;box-shadow:0 16px 30px -12px rgba(92,138,87,.7);transition:.4s cubic-bezier(.2,.8,.2,1);opacity:0;z-index:99;bottom:100px}
   .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 
   code{background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:12px;color:var(--accent)}
@@ -251,7 +251,7 @@
   /* ---------- responsive ---------- */
   @media(max-width:980px){.col-3,.col-4,.col-5,.col-6,.col-7,.col-8{grid-column:span 12}}
   @media(max-width:640px){
-    .wrap{padding:18px 14px 44px}
+    .wrap{padding:18px 14px 120px}
     .grid{gap:15px}
     .card{padding:18px;border-radius:18px}
     .brand h1{font-size:22px}
@@ -359,6 +359,32 @@
   .wb .bar2{width:100%;max-width:36px;border-radius:11px 11px 5px 5px;background:linear-gradient(180deg,var(--lime),var(--lime-2));min-height:6px;transition:height .5s cubic-bezier(.2,.8,.2,1)}
   .wb .bar2.today{background:linear-gradient(180deg,#3a3f2c,#14160d)}
   .wb .dl{font-size:11px;color:var(--muted);font-weight:800}
+  /* ---------- bottom navigation (mobile-app style) ---------- */
+  #tabs{display:none!important}
+  .bnav{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:80;display:flex;align-items:center;
+    gap:4px;background:#fff;border:1px solid var(--line);border-radius:30px;padding:8px 12px;
+    box-shadow:0 18px 40px -16px rgba(20,22,13,.34);width:min(440px,calc(100% - 26px));justify-content:space-between}
+  .bn{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;
+    font-family:inherit;font-weight:700;font-size:10.5px;color:var(--muted);flex:1;min-width:0;padding:5px 2px;border-radius:14px;transition:.15s}
+  .bn svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.9}
+  .bn.on{color:var(--ink)}
+  .bn:hover{color:var(--ink)}
+  .bdot{position:absolute;top:2px;right:calc(50% - 17px);width:8px;height:8px;border-radius:50%;background:var(--bad);display:none;box-shadow:0 0 0 2px #fff}
+  .bfab{flex:0 0 auto;width:54px;height:54px;border-radius:50%;background:var(--ink);color:var(--lime);border:none;cursor:pointer;
+    display:grid;place-items:center;margin:-26px 4px 0;box-shadow:0 14px 26px -10px rgba(20,22,13,.65);transition:.15s}
+  .bfab svg{width:26px;height:26px;stroke:var(--lime);fill:none;stroke-width:2.4}
+  .bfab:hover{transform:translateY(-2px)}
+  .sheet-bg{position:fixed;inset:0;background:rgba(20,22,13,.42);z-index:90;opacity:0;pointer-events:none;transition:.2s}
+  .sheet-bg.on{opacity:1;pointer-events:auto}
+  .sheet{position:fixed;left:50%;bottom:0;transform:translateX(-50%) translateY(115%);z-index:95;width:min(440px,calc(100% - 20px));
+    background:#fff;border-radius:26px 26px 0 0;padding:16px 16px 110px;box-shadow:0 -12px 44px -12px rgba(20,22,13,.32);
+    transition:transform .26s cubic-bezier(.2,.8,.2,1)}
+  .sheet.on{transform:translateX(-50%) translateY(0)}
+  .sheet .sh{font-weight:800;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;padding:6px 8px 12px}
+  .srow{display:flex;align-items:center;gap:13px;width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:16px;
+    padding:14px 16px;margin-bottom:9px;font-family:inherit;font-weight:800;font-size:15px;color:var(--ink);cursor:pointer;transition:.15s;text-align:left}
+  .srow:hover{border-color:var(--lime-2);background:#fff}
+  .srow span{font-size:20px}
 </style>
 </head>
 <body>
@@ -724,6 +750,23 @@
   </p>
 </div>
 
+<nav class="bnav" id="bottomnav" aria-label="Primary">
+  <button class="bn on" data-go="today"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg><span>Today</span></button>
+  <button class="bn" data-go="coach"><span class="bdot" id="bSyncDot"></span><svg viewBox="0 0 24 24"><path d="M4 5h16v11H8l-4 4V5Z" stroke-linejoin="round"/></svg><span>Coach</span></button>
+  <button class="bfab" id="bfab" aria-label="Quick add"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg></button>
+  <button class="bn" data-go="insights"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 15l4-5 3 3 4-6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Insights</span></button>
+  <button class="bn" data-go="profile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 21c1.4-4.2 12.6-4.2 14 0" stroke-linecap="round"/></svg><span>Profile</span></button>
+</nav>
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="sheet">
+  <div class="sh">Quick add</div>
+  <button class="srow" data-go="meals"><span>🍳</span> Suggested meals</button>
+  <button class="srow" id="sLog"><span>🍽️</span> Log a meal</button>
+  <button class="srow" id="sWater"><span>💧</span> +1 glass of water</button>
+  <button class="srow" data-go="devices"><span>⌚</span> Devices &amp; activity</button>
+  <button class="srow" data-go="settings"><span>⚙️</span> Settings</button>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1071,7 +1114,7 @@ function setSync(){
   const dot=document.getElementById("syncDot");
   bar.className="sync "+(ok?"ok":"no");
   txt.textContent=ok?"In sync — I've reviewed your latest logs ✓":"Out of sync — you've logged things I haven't reviewed yet.";
-  dot.className="dot"+(ok?" ok":"");
+  dot.className="dot"+(ok?" ok":"");var bd=document.getElementById("bSyncDot");if(bd)bd.style.display=ok?"none":"block";
 }
 function coachReview(){
   // proactive analysis message
@@ -1627,11 +1670,16 @@ function renderWeekBars(){
   var pe=document.getElementById("weekPct");if(pe)pe.textContent=Math.round(sum/dates.length)+"%";
 }
 
+/* ===================== BOTTOM NAV ===================== */
+function setBnav(v){document.querySelectorAll('.bn[data-go]').forEach(function(b){b.classList.toggle('on',b.dataset.go===v);});}
+function openSheet(){var s=document.getElementById('sheet'),bg=document.getElementById('sheetBg');if(s)s.classList.add('on');if(bg)bg.classList.add('on');}
+function closeSheet(){var s=document.getElementById('sheet'),bg=document.getElementById('sheetBg');if(s)s.classList.remove('on');if(bg)bg.classList.remove('on');}
+
 /* ===================== EVENTS ===================== */
 document.getElementById("tabs").addEventListener("click",e=>{const tab=e.target.closest(".tab");if(!tab)return;
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("on"));tab.classList.add("on");
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("on"));
-  document.getElementById("v-"+tab.dataset.v).classList.add("on");});
+  document.getElementById("v-"+tab.dataset.v).classList.add("on");setBnav(tab.dataset.v);window.scrollTo({top:0,behavior:"smooth"});});
 
 function bindEvents(){
   prevDay.onclick=()=>shiftDate(-1);nextDay.onclick=()=>shiftDate(1);todayBtn.onclick=()=>{curDate=todayStr();renderAll();};
@@ -1675,6 +1723,12 @@ function bindEvents(){
   var qw=document.getElementById("qWater");if(qw)qw.onclick=function(){day().water+=250;save();renderWater();renderCoachTab();renderWeekBars();toast("+250 ml logged 💧");};
   var qk=document.getElementById("qWorkout");if(qk)qk.onclick=function(){switchTab("devices");setTimeout(function(){var a=document.getElementById("aKcal");if(a){a.scrollIntoView({behavior:"smooth",block:"center"});a.focus();}},80);};
   var qs=document.getElementById("qSleep");if(qs)qs.onclick=function(){switchTab("devices");setTimeout(function(){var a=document.getElementById("aSleep");if(a){a.scrollIntoView({behavior:"smooth",block:"center"});a.focus();}},80);};
+  document.querySelectorAll('.bn[data-go]').forEach(function(b){b.onclick=function(){switchTab(b.dataset.go);};});
+  var fab=document.getElementById('bfab');if(fab)fab.onclick=openSheet;
+  var sbg=document.getElementById('sheetBg');if(sbg)sbg.onclick=closeSheet;
+  document.querySelectorAll('.srow[data-go]').forEach(function(b){b.onclick=function(){switchTab(b.dataset.go);closeSheet();};});
+  var sLog=document.getElementById('sLog');if(sLog)sLog.onclick=function(){switchTab('today');closeSheet();setTimeout(function(){var i=document.getElementById('mName');if(i){i.scrollIntoView({behavior:'smooth',block:'center'});i.focus();}},150);};
+  var sWater=document.getElementById('sWater');if(sWater)sWater.onclick=function(){day().water+=250;save();renderWater();renderCoachTab();if(typeof renderWeekBars==='function')renderWeekBars();closeSheet();toast('+250 ml logged 💧');};
 }
 
 /* ===================== BOOT ===================== */
@@ -1684,6 +1738,7 @@ function boot(){
   applyLang();
   renderAll();
   startReminders();
+  setBnav("today");
 }
 registerSW();
 bindEvents();
