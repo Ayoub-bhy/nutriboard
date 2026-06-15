@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Nutriboard · Delivery Control Board</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f4f6f8; --panel:#ffffff; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+  --green:#16a34a; --greenSoft:#dcfce7;
+  --p0:#ef4444; --p1:#f59e0b; --p2:#eab308;
+  --shadow:0 1px 2px rgba(15,23,42,.06),0 4px 14px rgba(15,23,42,.05);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 18px 60px;}
+header.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
+h1{font-size:20px;margin:0;letter-spacing:-.2px}
+h1 .dot{color:var(--green)}
+.sub{color:var(--muted);font-size:12.5px;margin:2px 0 0}
+.snap{font-size:12px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 12px;box-shadow:var(--shadow)}
+.snap b{color:var(--ink)}
+.tabs{display:flex;gap:6px;margin:16px 0 14px;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:8px 14px;border-radius:10px;cursor:pointer;font-weight:600;font-size:13px}
+.tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.view{display:none;animation:fade .25s ease}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* KPI tiles */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+.kpi .v{font-size:26px;font-weight:700;letter-spacing:-.5px}
+.kpi .l{color:var(--muted);font-size:12px;margin-top:2px}
+.kpi .bar{height:6px;border-radius:99px;background:var(--line);margin-top:10px;overflow:hidden}
+.kpi .bar i{display:block;height:100%;background:var(--green)}
+
+.grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media(max-width:880px){.grid2,.grid3{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+.card h3{margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+.chartbox{position:relative;height:230px}
+
+/* role filter */
+.rolebar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:7px;box-shadow:var(--shadow)}
+.chip .swatch{width:10px;height:10px;border-radius:50%}
+.chip.off{opacity:.4}
+.chip.allbtn{font-weight:700}
+
+/* kanban */
+.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:880px){.kanban{grid-template-columns:1fr 1fr}}
+.col{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;box-shadow:var(--shadow);min-height:120px}
+.col h4{margin:2px 4px 10px;font-size:13px;display:flex;align-items:center;justify-content:space-between}
+.col h4 .cnt{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:1px 9px;font-size:11.5px;color:var(--muted)}
+.col.wip h4 .cnt.over{background:#fee2e2;border-color:#fecaca;color:#b91c1c}
+.tk{background:#fff;border:1px solid var(--line);border-left:4px solid var(--green);border-radius:10px;padding:9px 10px;margin-bottom:8px;box-shadow:0 1px 1px rgba(15,23,42,.04)}
+.tk .ttl{font-size:12.5px;font-weight:600;line-height:1.35}
+.tk .meta{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
+.badge{font-size:10px;font-weight:700;border-radius:6px;padding:2px 6px;color:#fff;letter-spacing:.2px}
+.pri{font-size:10px;font-weight:700;border-radius:6px;padding:2px 6px}
+.pri.P0{background:#fee2e2;color:#b91c1c}.pri.P1{background:#ffedd5;color:#c2410c}.pri.P2{background:#fef9c3;color:#a16207}.pri.FND{background:#e2e8f0;color:#475569}
+.empty{color:var(--muted);font-size:12px;text-align:center;padding:18px 6px;border:1px dashed var(--line);border-radius:10px}
+
+/* backlog mini */
+.backlog{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:880px){.backlog{grid-template-columns:1fr}}
+
+/* roadmap */
+.axis{display:grid;grid-template-columns:repeat(8,1fr);font-size:11px;color:var(--muted);margin:4px 0 8px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.phase{display:grid;grid-template-columns:160px 1fr;gap:12px;align-items:center;margin:10px 0}
+.phase .nm{font-size:12.5px;font-weight:600}
+.phase .nm small{display:block;color:var(--muted);font-weight:400}
+.track{position:relative;height:42px;background:var(--bg);border:1px solid var(--line);border-radius:10px}
+.barp{position:absolute;top:6px;bottom:6px;border-radius:8px;color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;padding:0 10px;overflow:hidden;white-space:nowrap}
+.legendline{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--muted)}
+.legendline span{display:flex;align-items:center;gap:6px}
+.legendline i{width:12px;height:12px;border-radius:3px;display:inline-block}
+
+/* flow */
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fstep{flex:1;min-width:120px;text-align:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 8px;box-shadow:var(--shadow);position:relative}
+.fstep .n{font-size:24px;font-weight:700}
+.fstep .s{font-size:12px;color:var(--muted);margin-top:2px}
+.farrow{display:flex;align-items:center;color:var(--muted);font-size:20px;padding:0 6px}
+.note{background:var(--greenSoft);border:1px solid #bbf7d0;color:#14532d;border-radius:12px;padding:12px 14px;font-size:12.5px;margin-top:14px}
+.note b{color:#166534}
+ul.tips{margin:8px 0 0;padding-left:18px}
+ul.tips li{margin:4px 0;font-size:12.5px}
+.foot{color:var(--muted);font-size:11.5px;margin-top:18px;text-align:center}
+a{color:var(--green)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Nutri<span class="dot">●</span>board · Delivery Control Board</h1>
+      <p class="sub">Workflow · metrics · roadmap — mirror of the team Trello board</p>
+    </div>
+    <div class="snap">Snapshot: <b id="snapDate">—</b> · <span id="totalTop">—</span> work items</div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-view="overview">Overview</button>
+    <button class="tab" data-view="board">Workflow Board</button>
+    <button class="tab" data-view="roadmap">Roadmap</button>
+    <button class="tab" data-view="flow">Flow &amp; Health</button>
+  </div>
+
+  <!-- OVERVIEW -->
+  <section class="view active" id="overview">
+    <div class="kpis" id="kpis"></div>
+    <div class="grid2">
+      <div class="card"><h3>Work by status</h3><div class="chartbox"><canvas id="statusChart"></canvas></div></div>
+      <div class="card"><h3>Sprint (P0) progress</h3><div class="chartbox"><canvas id="sprintChart"></canvas></div></div>
+    </div>
+    <div class="grid3">
+      <div class="card"><h3>Load by role (squad)</h3><div class="chartbox"><canvas id="roleChart"></canvas></div></div>
+      <div class="card"><h3>Items by priority tier</h3><div class="chartbox"><canvas id="priChart"></canvas></div></div>
+    </div>
+  </section>
+
+  <!-- BOARD -->
+  <section class="view" id="board">
+    <div class="rolebar" id="rolebar"></div>
+    <div class="kanban" id="kanban"></div>
+    <div class="card" style="margin-top:14px">
+      <h3>Backlog (pull into To Do as sprint clears)</h3>
+      <div class="backlog">
+        <div><h4 style="margin:0 0 8px;font-size:13px">🟧 Next · P1 <span style="color:var(--muted)" id="p1cnt"></span></h4><div id="p1list"></div></div>
+        <div><h4 style="margin:0 0 8px;font-size:13px">🟨 Later · P2 <span style="color:var(--muted)" id="p2cnt"></span></h4><div id="p2list"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROADMAP -->
+  <section class="view" id="roadmap">
+    <div class="card">
+      <h3>Delivery roadmap (months 0–24)</h3>
+      <div class="axis" id="axis"></div>
+      <div id="phases"></div>
+      <div class="legendline">
+        <span><i style="background:var(--green)"></i> Foundations</span>
+        <span><i style="background:var(--p0)"></i> P0 · MVP</span>
+        <span><i style="background:var(--p1)"></i> P1 · Revenue scale</span>
+        <span><i style="background:var(--p2)"></i> P2 · Regulated / niche</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Budget &amp; team checkpoints</h3>
+      <ul class="tips">
+        <li><b>MVP team ~18–26</b> · 6-month build ≈ <b>$1.2–2.0M</b> (team + cloud + AI + food-DB licensing).</li>
+        <li><b>Scale team ~45–70</b> across 5–6 squads · Year 1 ≈ <b>$4–7M</b> (scope-dependent).</li>
+        <li>Gate to Phase 2: P0 complete + activation/retention metrics instrumented.</li>
+        <li>Gate to Phase 3: clinical/regulatory (HIPAA, reimbursement) cleared before medical scale-up.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- FLOW -->
+  <section class="view" id="flow">
+    <div class="card">
+      <h3>Value-stream flow</h3>
+      <div class="flow" id="flowsteps"></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h3>Delivery health (best-practice checks)</h3>
+        <ul class="tips" id="health"></ul>
+      </div>
+      <div class="card">
+        <h3>Definition of Done</h3>
+        <ul class="tips">
+          <li>Acceptance criteria met &amp; demoed.</li>
+          <li>Reviewed in 👀 Review by another role (QA where applicable).</li>
+          <li>Privacy/Security check passed for auth, health-data &amp; payment cards.</li>
+          <li>Analytics events instrumented for activation/retention features.</li>
+          <li>No open blocker comments on the card.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="note">
+      <b>About "live".</b> This board is a faithful snapshot of the Trello board on the date shown; it is regenerated from Cowork on request (no live Trello connector). Board: <a href="https://trello.com/b/1L4LCZ55/nutriboard">trello.com/b/1L4LCZ55/nutriboard</a>.
+    </div>
+  </section>
+
+  <div class="foot">Source: Trello board "Nutriboard" — live-checked 15 Jun 2026. 7 squads active (PROD · ENG · ML · CLIN · GROWTH · SEC · QA). Management control board: status + WIP + flow + roadmap.</div>
+</div>
+
+<script>
+const SNAPSHOT_DATE = "15 Jun 2026";
+const ROLES = {
+  PROD:{name:"Product & Design", c:"#6366f1"},
+  ENG:{name:"Engineering", c:"#3b82f6"},
+  ML:{name:"Data & AI/ML", c:"#0d9488"},
+  CLIN:{name:"Clinical & Nutrition", c:"#ef4444"},
+  GROWTH:{name:"Growth & Commerce", c:"#f59e0b"},
+  SEC:{name:"Security & Compliance", c:"#64748b"},
+  QA:{name:"Delivery & QA", c:"#db2777"}
+};
+// status: todo | inprogress | review | done | p1 | p2
+const CARDS = [
+  // DONE
+  {t:"AI photo-to-food logging", r:"ML", p:"P0", s:"done"},
+  {t:"Goal selection step", r:"PROD", p:"P0", s:"done"},
+  {t:"Auto meal planner + grocery list", r:"ML", p:"P1", s:"done"},
+  {t:"Comprehensive verified food database", r:"ML", p:"P0", s:"done"},
+  // REVIEW
+  {t:"Corporate wellness B2B (dashboards, SSO)", r:"GROWTH", p:"P1", s:"review"},
+  {t:"Diabetes coaching module (non-reimbursed)", r:"CLIN", p:"P1", s:"review"},
+  {t:"Freemium subscription + paywall", r:"GROWTH", p:"P0", s:"review"},
+  {t:"Trust & Safety: medical disclaimers + content governance", r:"SEC", p:"P0", s:"review"},
+  // IN PROGRESS
+  {t:"Reduced-friction signup (Apple/Google)", r:"ENG", p:"P0", s:"inprogress"},
+  {t:"Barcode scanner logging", r:"ENG", p:"P0", s:"inprogress"},
+  {t:"Analytics & Experimentation infra", r:"QA", p:"FND", s:"inprogress"},
+  {t:"Data Privacy & Consent Foundation (GDPR/CCPA)", r:"SEC", p:"P0", s:"inprogress"},
+  {t:"Persona quiz + adaptive home", r:"PROD", p:"P0", s:"inprogress"},
+  {t:"SOC 2 Type II Readiness Program", r:"SEC", p:"P0", s:"inprogress"},
+  {t:"Progress visualization + milestones", r:"PROD", p:"P0", s:"inprogress"},
+  {t:"HIPAA Boundary & PHI Handling Framework", r:"SEC", p:"P0", s:"inprogress"},
+  {t:"Smart reminders + no-guilt streaks", r:"GROWTH", p:"P0", s:"inprogress"},
+  // TO DO
+  {t:"Quick-add + recent re-log", r:"ENG", p:"P0", s:"todo"},
+  {t:"Custom macro targets", r:"ENG", p:"P0", s:"todo"},
+  // P1 — next (backlog)
+  {t:"Plan builder + client assignment", r:"ENG", p:"P1", s:"p1"},
+  {t:"Client adherence dashboard + alerts", r:"ENG", p:"P1", s:"p1"},
+  {t:"Secure messaging + telehealth", r:"ENG", p:"P1", s:"p1"},
+  {t:"Grocery delivery / e-commerce checkout", r:"ENG", p:"P1", s:"p1"},
+  {t:"Marketplace: supplements / meal-kits affiliate", r:"GROWTH", p:"P1", s:"p1"},
+  {t:"Diet profiles + allergen scanner", r:"ML", p:"P1", s:"p1"},
+  {t:"Apple Health / Google Fit + wearables", r:"ENG", p:"P1", s:"p1"},
+  {t:"Micronutrient dashboard + advanced analytics", r:"ML", p:"P1", s:"p1"},
+  {t:"GLP-1 / weight-program partnerships", r:"GROWTH", p:"P1", s:"p1"},
+  {t:"Referral + growth loops", r:"GROWTH", p:"P1", s:"p1"},
+  // P2 — later (backlog)
+  {t:"Clinician connection + secure data sharing", r:"CLIN", p:"P2", s:"p2"},
+  {t:"Tele-nutrition / dietitian video visits", r:"CLIN", p:"P2", s:"p2"},
+  {t:"Insurance / reimbursement eligibility + billing", r:"GROWTH", p:"P2", s:"p2"},
+  {t:"Provider / EHR data export + reports", r:"ENG", p:"P2", s:"p2"},
+  {t:"Full condition modules (GI, heart, kidney)", r:"CLIN", p:"P2", s:"p2"},
+  {t:"White-label licensing to brands / retailers", r:"GROWTH", p:"P2", s:"p2"},
+  {t:"Wearable + lab-result + microbiome tracking", r:"ENG", p:"P2", s:"p2"},
+  {t:"Longevity score / health-age metric", r:"ML", p:"P2", s:"p2"},
+  {t:"Multi-profile household + batch-cook mode", r:"ENG", p:"P2", s:"p2"},
+  {t:"User-submitted foods + moderation", r:"ML", p:"P2", s:"p2"},
+  {t:"Nutrient-adequacy checks + substitutions", r:"ML", p:"P2", s:"p2"}
+];
+const WIP_LIMIT = 6; // in-progress guideline (~1 per active squad)
+
+let activeRoles = new Set(Object.keys(ROLES));
+document.getElementById('snapDate').textContent = SNAPSHOT_DATE;
+document.getElementById('totalTop').textContent = CARDS.length;
+
+const by = (fn)=>CARDS.reduce((m,c)=>{const k=fn(c);m[k]=(m[k]||0)+1;return m;},{});
+const statusCounts = ()=>({todo:0,inprogress:0,review:0,done:0,p1:0,p2:0, ...by(c=>c.s)});
+
+/* ---------- KPIs ---------- */
+function renderKPIs(){
+  const sc = statusCounts();
+  const sprintTotal = CARDS.filter(c=>c.p==="P0").length;
+  const sprintDone = CARDS.filter(c=>c.p==="P0"&&c.s==="done").length;
+  const pct = sprintTotal? Math.round(sprintDone/sprintTotal*100):0;
+  const wip = sc.inprogress;
+  const tiles = [
+    {v:CARDS.length, l:"Total work items"},
+    {v:sprintTotal, l:"P0 sprint scope"},
+    {v:pct+"%", l:"Sprint complete", bar:pct},
+    {v:wip+" / "+WIP_LIMIT, l:"Work in progress"},
+    {v:sc.review, l:"In review"},
+    {v:sc.p1+sc.p2, l:"Backlog (P1+P2)"}
+  ];
+  document.getElementById('kpis').innerHTML = tiles.map(t=>`
+    <div class="kpi"><div class="v">${t.v}</div><div class="l">${t.l}</div>
+    ${t.bar!==undefined?`<div class="bar"><i style="width:${t.bar}%"></i></div>`:''}</div>`).join('');
+}
+
+/* ---------- Charts ---------- */
+let charts={};
+function renderCharts(){
+  const sc = statusCounts();
+  const ctxS = document.getElementById('statusChart');
+  charts.s && charts.s.destroy();
+  charts.s = new Chart(ctxS,{type:'doughnut',data:{
+    labels:['To Do','In Progress','Review','Done','Next (P1)','Later (P2)'],
+    datasets:[{data:[sc.todo,sc.inprogress,sc.review,sc.done,sc.p1,sc.p2],
+      backgroundColor:['#3b82f6','#f59e0b','#a855f7','#16a34a','#fb923c','#eab308'],borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}}},cutout:'58%'}});
+
+  const sprintTotal = CARDS.filter(c=>c.p==="P0").length;
+  const sprintDone = CARDS.filter(c=>c.p==="P0"&&c.s==="done").length;
+  charts.sp && charts.sp.destroy();
+  charts.sp = new Chart(document.getElementById('sprintChart'),{type:'bar',data:{
+    labels:['P0 Sprint'],datasets:[
+      {label:'Done',data:[sprintDone],backgroundColor:'#16a34a'},
+      {label:'Remaining',data:[sprintTotal-sprintDone],backgroundColor:'#e2e8f0'}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',scales:{x:{stacked:true,max:sprintTotal,ticks:{precision:0}},y:{stacked:true}},plugins:{legend:{position:'bottom'}}}});
+
+  const rc = by(c=>c.r);
+  const rk = Object.keys(ROLES).sort((a,b)=>(rc[b]||0)-(rc[a]||0));
+  charts.r && charts.r.destroy();
+  charts.r = new Chart(document.getElementById('roleChart'),{type:'bar',data:{
+    labels:rk.map(k=>ROLES[k].name),datasets:[{data:rk.map(k=>rc[k]||0),backgroundColor:rk.map(k=>ROLES[k].c),borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{precision:0}}}}});
+
+  const pc = by(c=>c.p);
+  charts.p && charts.p.destroy();
+  charts.p = new Chart(document.getElementById('priChart'),{type:'bar',data:{
+    labels:['P0 · Build now','P1 · Next','P2 · Later','Foundations'],datasets:[{data:[pc.P0||0,pc.P1||0,pc.P2||0,pc.FND||0],
+      backgroundColor:['#ef4444','#f59e0b','#eab308','#64748b'],borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{precision:0}}}}});
+}
+
+/* ---------- Role filter ---------- */
+function renderRolebar(){
+  const rc = by(c=>c.r);
+  let html = `<button class="chip allbtn" data-role="ALL">All squads</button>`;
+  html += Object.keys(ROLES).map(k=>`
+    <button class="chip ${activeRoles.has(k)?'':'off'}" data-role="${k}">
+      <span class="swatch" style="background:${ROLES[k].c}"></span>${k} · ${ROLES[k].name.split(' ')[0]} <b style="color:var(--muted)">${rc[k]||0}</b>
+    </button>`).join('');
+  const rb = document.getElementById('rolebar');
+  rb.innerHTML = html;
+  rb.querySelectorAll('.chip').forEach(ch=>ch.onclick=()=>{
+    const role=ch.dataset.role;
+    if(role==="ALL"){activeRoles=new Set(Object.keys(ROLES));}
+    else{ if(activeRoles.has(role))activeRoles.delete(role); else activeRoles.add(role);
+      if(activeRoles.size===0)activeRoles=new Set(Object.keys(ROLES)); }
+    renderRolebar(); renderKanban(); renderBacklog();
+  });
+}
+
+function tkHTML(c){
+  return `<div class="tk" style="border-left-color:${ROLES[c.r].c}">
+    <div class="ttl">${c.t}</div>
+    <div class="meta"><span class="badge" style="background:${ROLES[c.r].c}">${c.r}</span><span class="pri ${c.p}">${c.p}</span></div>
+  </div>`;
+}
+function renderKanban(){
+  const cols=[['todo','📋 To Do'],['inprogress','🚧 In Progress'],['review','👀 Review'],['done','✅ Done']];
+  const k=document.getElementById('kanban');
+  k.innerHTML = cols.map(([s,label])=>{
+    const items=CARDS.filter(c=>c.s===s && activeRoles.has(c.r));
+    const over = s==='inprogress' && items.length>WIP_LIMIT;
+    return `<div class="col ${s==='inprogress'?'wip':''}">
+      <h4>${label}<span class="cnt ${over?'over':''}">${items.length}${s==='inprogress'?'/'+WIP_LIMIT:''}</span></h4>
+      ${items.length? items.map(tkHTML).join('') : '<div class="empty">— empty —</div>'}
+    </div>`;}).join('');
+}
+function renderBacklog(){
+  const p1=CARDS.filter(c=>c.s==='p1'&&activeRoles.has(c.r));
+  const p2=CARDS.filter(c=>c.s==='p2'&&activeRoles.has(c.r));
+  document.getElementById('p1list').innerHTML = p1.map(tkHTML).join('')||'<div class="empty">— none —</div>';
+  document.getElementById('p2list').innerHTML = p2.map(tkHTML).join('')||'<div class="empty">— none —</div>';
+  document.getElementById('p1cnt').textContent='('+p1.length+')';
+  document.getElementById('p2cnt').textContent='('+p2.length+')';
+}
+
+/* ---------- Roadmap ---------- */
+function renderRoadmap(){
+  const ax=document.getElementById('axis');
+  ax.innerHTML=[0,3,6,9,12,15,18,24].map(m=>`<div>M${m}</div>`).join('');
+  const phases=[
+    {nm:"Phase 0 · Foundations",sub:"signup · food DB · privacy & analytics",s:0,e:3,c:"var(--green)"},
+    {nm:"Phase 1 · MVP launch",sub:"P0 — logging loop · retention · paywall",s:3,e:6,c:"var(--p0)"},
+    {nm:"Phase 2 · Revenue scale",sub:"P1 — B2B · commerce · integrations · diabetes coaching",s:6,e:12,c:"var(--p1)"},
+    {nm:"Phase 3 · Regulated / niche",sub:"P2 — clinical/reimbursement · white-label · longevity",s:12,e:24,c:"var(--p2)"}
+  ];
+  document.getElementById('phases').innerHTML = phases.map(p=>{
+    const left=(p.s/24*100), w=((p.e-p.s)/24*100);
+    return `<div class="phase"><div class="nm">${p.nm}<small>${p.sub}</small></div>
+      <div class="track"><div class="barp" style="left:${left}%;width:${w}%;background:${p.c}">M${p.s}–M${p.e}</div></div></div>`;
+  }).join('');
+}
+
+/* ---------- Flow & health ---------- */
+function renderFlow(){
+  const sc=statusCounts();
+  const steps=[['Backlog',sc.p1+sc.p2],['To Do',sc.todo],['In Progress',sc.inprogress],['Review',sc.review],['Done',sc.done]];
+  document.getElementById('flowsteps').innerHTML = steps.map((s,i)=>`
+    <div class="fstep"><div class="n">${s[1]}</div><div class="s">${s[0]}</div></div>
+    ${i<steps.length-1?'<div class="farrow">→</div>':''}`).join('');
+
+  const sc2=statusCounts();
+  const eng = by(c=>c.r).ENG||0;
+  const p0 = by(c=>c.p).P0||0;
+  const health=[
+    sc2.done===0?'⏳ <b>No items completed yet</b> — cycle-time & throughput will populate once cards reach Done.':`✅ <b>${sc2.done} done</b> — track weekly cards-to-Done for throughput.`,
+    sc2.inprogress===0?'🟦 <b>Nothing in progress</b> — pull the top P0 cards to start.':(sc2.inprogress>WIP_LIMIT?`🔴 <b>WIP over limit</b> (${sc2.inprogress}/${WIP_LIMIT}) — finish before starting new work.`:`🟢 WIP healthy (${sc2.inprogress}/${WIP_LIMIT}).`),
+    `🎯 <b>Sprint focus:</b> ${p0} P0 cards = the acquire→log→retain→convert loop + paywall + foundations.`,
+    '🧭 <b>Single source of truth:</b> status lives on the card; comment + @mention only for blockers/handoffs.',
+    `⚖️ <b>Balance:</b> ENG is the heaviest squad (${eng} items) — watch for bottlenecks; sequence ML food-DB & photo model early (they unblock ENG).`
+  ];
+  document.getElementById('health').innerHTML = health.map(h=>`<li>${h}</li>`).join('');
+}
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById(t.dataset.view).classList.add('active');
+});
+
+/* init */
+renderKPIs(); renderCharts(); renderRolebar(); renderKanban(); renderBacklog(); renderRoadmap(); renderFlow();
+</script>
+</body>
+</html>
