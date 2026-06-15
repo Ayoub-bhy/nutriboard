@@ -385,14 +385,64 @@
     padding:14px 16px;margin-bottom:9px;font-family:inherit;font-weight:800;font-size:15px;color:var(--ink);cursor:pointer;transition:.15s;text-align:left}
   .srow:hover{border-color:var(--lime-2);background:#fff}
   .srow span{font-size:20px}
+  /* ---------- greeting header ---------- */
+  .hgreet .heyebrow{font-size:11px;font-weight:800;letter-spacing:1.4px;color:var(--muted);margin-bottom:2px}
+  .hgreet .hhello{font-family:var(--font-display);font-size:26px;font-weight:800;letter-spacing:-.6px;color:var(--ink);line-height:1.05}
+  .acct{display:flex;align-items:center;gap:10px}
+  .hbell{width:46px;height:46px;border-radius:50%;background:#fff;border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow-soft);transition:.15s;flex-shrink:0}
+  .hbell:hover{transform:translateY(-1px)}
+  .hbell svg{width:21px;height:21px;stroke:var(--ink);fill:none;stroke-width:1.7}
+  .havatar{width:46px;height:46px;border-radius:50%;cursor:pointer;display:grid;place-items:center;font-weight:800;color:#fff;font-size:15px;
+    background:linear-gradient(150deg,var(--lime),var(--lime-2));overflow:hidden;border:none;flex-shrink:0;box-shadow:var(--shadow-soft);transition:.15s}
+  .havatar:hover{transform:translateY(-1px)}
+  .havatar img{width:100%;height:100%;object-fit:cover}
+  @media(max-width:600px){.hgreet .hhello{font-size:22px}}
+  /* ---------- Today's goals card (ring + value chips) ---------- */
+  .wins{justify-content:space-between}
+  .wins-ring{position:relative;flex-shrink:0;width:118px;height:118px;display:grid;place-items:center;z-index:1}
+  .wr-num{position:absolute;font-family:var(--font-display);font-size:28px;font-weight:800;color:#fff;letter-spacing:-1px}
+  .wins-streak{font-weight:800;font-size:18px;margin-bottom:6px;line-height:1.25}
+  .wins-streak b{color:var(--lime)}
+  .wins-badges{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+  @media(max-width:600px){.wins-badges{grid-template-columns:1fr 1fr}}
+  .wbadge{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;padding:9px 12px;border-radius:13px;
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.8);opacity:1}
+  .wbadge.on{background:var(--lime);color:var(--ink);border-color:var(--lime)}
+  .wbadge .wck{font-weight:900}
+  .wbadge .wv{margin-left:auto;font-weight:800;opacity:.85}
+  .wins-msg{margin-top:2px}
+  /* ---------- dark calorie hero card ---------- */
+  .card.hero-cal{background:radial-gradient(130% 150% at 100% 0,rgba(123,192,67,.28),transparent 55%),#14160d;border-color:transparent;color:#fff}
+  .card.hero-cal::before{display:none}
+  .card.hero-cal > h2{display:none}
+  .calbadge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+    color:var(--lime);font-weight:800;font-size:12.5px;padding:6px 13px;border-radius:999px;margin-bottom:16px}
+  .calbadge::before{content:"✨"}
+  .hero-cal .ringwrap{align-items:center}
+  .calmain{flex:1;min-width:150px}
+  .caltop{display:flex;align-items:flex-end;gap:7px}
+  .caltop .big{font-family:var(--font-display);font-size:54px;font-weight:800;letter-spacing:-2px;line-height:.9;color:#fff}
+  .caltop .calslash{font-size:30px;color:rgba(255,255,255,.4);font-weight:700;line-height:1}
+  .caltarget{font-family:var(--font-display);font-size:30px;font-weight:800;color:rgba(255,255,255,.45);letter-spacing:-1px;margin-top:2px}
+  .calnote{font-size:13px;color:rgba(255,255,255,.62);font-weight:600;margin-top:11px;max-width:230px;line-height:1.45}
+  .hero-cal .ring{width:150px;height:150px}
+  .hero-cal .big2{font-family:var(--font-display);font-size:30px;font-weight:800;color:#fff;letter-spacing:-1px}
+  .cmacros{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-top:22px}
+  .cmac{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:13px}
+  .cml{font-size:10px;letter-spacing:.5px;color:rgba(255,255,255,.55);font-weight:800}
+  .cmv{font-size:22px;font-weight:800;margin:4px 0 9px;color:#fff}
+  .cmv .cmu{font-size:13px;color:rgba(255,255,255,.5);font-weight:700;margin-left:1px}
+  .hero-cal .cmac .bar{height:6px;background:rgba(255,255,255,.14)}
+  .cpill{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.72)}
+  .cpill b{color:#fff}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="brand">
-      <div class="logo">🥗</div>
-      <div><h1>NutriBoard</h1><p>Nutrition coach &amp; habit tracker</p></div>
+    <div class="hgreet">
+      <div class="heyebrow" id="hDate">TODAY</div>
+      <h1 class="hhello" id="hHello">Welcome 👋</h1>
     </div>
     <div class="acct" id="acctBox"></div>
   </header>
@@ -424,11 +474,15 @@
       </div>
     </div>
         <div class="wins" id="wins">
-      <div class="wins-score"><div class="ws-num" id="wsPct">0%</div><div class="ws-lbl">today's goals</div></div>
       <div class="wins-mid">
+        <div class="ws-lbl">TODAY'S GOALS</div>
         <div class="wins-streak" id="wsStreak"></div>
         <div class="wins-badges" id="wsBadges"></div>
         <div class="wins-msg" id="wsMsg"></div>
+      </div>
+      <div class="wins-ring">
+        <svg width="118" height="118"><circle cx="59" cy="59" r="49" fill="none" stroke="rgba(255,255,255,.13)" stroke-width="11"/><circle id="winRing" cx="59" cy="59" r="49" fill="none" stroke="#abe84d" stroke-width="11" stroke-linecap="round" stroke-dasharray="308" stroke-dashoffset="308" transform="rotate(-90 59 59)"/></svg>
+        <div class="wr-num" id="wsPct">0%</div>
       </div>
     </div>
     <div class="qrow">
@@ -449,27 +503,30 @@
         </div>
       </section>
 
-      <section class="card col-7">
+      <section class="card col-7 hero-cal">
         <h2>🔥 Energy &amp; Macros</h2>
+        <span class="calbadge"><span id="calLeftBadge">0 kcal left</span></span>
         <div class="ringwrap">
-          <div class="ring">
-            <svg width="170" height="170">
-              <circle cx="85" cy="85" r="72" fill="none" stroke="var(--panel-2)" stroke-width="14"/>
-              <circle id="ringFg" cx="85" cy="85" r="72" fill="none" stroke="url(#grad)" stroke-width="14"
-                stroke-linecap="round" stroke-dasharray="452" stroke-dashoffset="452"/>
-              <defs><linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#abe84d"/><stop offset="1" stop-color="#6fc23a"/></linearGradient></defs>
-            </svg>
-            <div class="center"><div class="big" id="calEaten">0</div>
-              <div class="lbl">of <span id="calGoal">0</span> kcal</div><div class="rem" id="calRem"></div></div>
+          <div class="calmain">
+            <div class="caltop"><span class="big" id="calEaten">0</span> <span class="calslash">/</span></div>
+            <div class="caltarget"><span id="calGoal">0</span></div>
+            <div class="calnote" id="calNote"></div>
           </div>
-          <div class="stats">
-            <div class="macro"><div class="head"><b>Protein</b><span><i id="pNow">0</i> / <i id="pGoal">0</i> g</span></div><div class="bar b-pro"><i id="pBar"></i></div></div>
-            <div class="macro"><div class="head"><b>Carbs</b><span><i id="cNow">0</i> / <i id="cGoal">0</i> g</span></div><div class="bar b-carb"><i id="cBar"></i></div></div>
-            <div class="macro"><div class="head"><b>Fat</b><span><i id="fNow">0</i> / <i id="fGoal">0</i> g</span></div><div class="bar b-fat"><i id="fBar"></i></div></div>
-            <div class="summary-row"><span class="pill">🍽️ Meals: <b id="mealCount">0</b></span><span class="pill">💪 Protein/meal: <b id="proPerMeal">—</b></span></div>
+          <div class="ring">
+            <svg width="150" height="150">
+              <circle cx="75" cy="75" r="62" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="13"/>
+              <circle id="ringFg" cx="75" cy="75" r="62" fill="none" stroke="url(#grad)" stroke-width="13" stroke-linecap="round" stroke-dasharray="390" stroke-dashoffset="390"/>
+              <defs><linearGradient id="grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#abe84d"/><stop offset="1" stop-color="#6fc23a"/></linearGradient></defs>
+            </svg>
+            <div class="center"><div class="big2" id="calPct">0%</div></div>
           </div>
         </div>
+        <div class="cmacros">
+          <div class="cmac"><div class="cml">PROTEIN</div><div class="cmv"><span id="pNow">0</span><span class="cmu">g</span></div><div class="bar b-pro"><i id="pBar"></i></div></div>
+          <div class="cmac"><div class="cml">CARBS</div><div class="cmv"><span id="cNow">0</span><span class="cmu">g</span></div><div class="bar b-carb"><i id="cBar"></i></div></div>
+          <div class="cmac"><div class="cml">FATS</div><div class="cmv"><span id="fNow">0</span><span class="cmu">g</span></div><div class="bar b-fat"><i id="fBar"></i></div></div>
+        </div>
+        <div class="summary-row"><span class="pill cpill">🍽️ Meals: <b id="mealCount">0</b></span><span class="pill cpill">💪 Protein/meal: <b id="proPerMeal">—</b></span></div>
       </section>
 
       <section class="card col-8">
@@ -727,6 +784,7 @@
         <div class="setrow"><div><div class="lbl" data-i18n="set_identity">You are using NutriBoard as</div><div class="sub" id="identitySub">—</div></div></div>
         <div class="notifbtn-row">
           <button class="btn ghost sm" id="newGuestBtn" data-i18n="set_new_guest">Start a new separate guest profile</button>
+          <button class="btn ghost sm" id="signoutBtn2">Sign out</button>
         </div>
         <p class="hint" data-i18n="set_account_note">Your information is stored privately in this browser, kept separate per person, and is never shared between accounts.</p>
         <div class="setrow" style="margin-top:8px"><div><div class="lbl">📲 <span data-i18n="set_install">Install as an app</span></div><div class="sub" data-i18n="set_install_sub">Add NutriBoard to your home screen or desktop so it opens like a real app and can send reminders.</div></div>
@@ -1189,14 +1247,20 @@ async function aiReply(text){
 
 /* ===================== RENDER ===================== */
 function renderAccount(){
-  const box=document.getElementById("acctBox");
-  const a=META_DB.account;
+  const box=document.getElementById("acctBox");const a=META_DB.account;
+  const hr=new Date().getHours(),tod=hr<12?"Good morning":hr<18?"Good afternoon":"Good evening";
+  const hHello=document.getElementById("hHello"),hDate=document.getElementById("hDate");
+  if(hDate)hDate.textContent=new Date().toLocaleDateString(undefined,{weekday:"long",month:"short",day:"numeric"}).toUpperCase();
+  let nm="";if(a&&a.name&&a.name!=="Guest")nm=a.name.split(" ")[0];
+  if(hHello)hHello.textContent=nm?(tod+", "+nm+" \u{1F44B}"):((a&&a.email)?(tod+" \u{1F44B}"):"Welcome \u{1F44B}");
   if(a&&a.email){
-    box.innerHTML=`<div class="who"><span class="avatar">${a.picture?`<img src="${a.picture}">`:initials(a.name||a.email)}</span><span>${esc(a.name||a.email)}</span></div><button class="btn ghost sm" id="signout">Sign out</button>`;
-    document.getElementById("signout").onclick=()=>{delete META_DB.account;saveMeta();location.reload();};
+    box.innerHTML='<button class="hbell" id="bellBtn" title="Reminders"><svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z" stroke-linejoin="round"/><path d="M9.5 19a2.5 2.5 0 0 0 5 0" stroke-linecap="round"/></svg></button>'+
+      '<button class="havatar" id="avatarBtn" title="Profile">'+(a.picture?('<img src="'+esc(a.picture)+'">'):initials(a.name||a.email))+'</button>';
+    document.getElementById("bellBtn").onclick=function(){switchTab("settings");};
+    document.getElementById("avatarBtn").onclick=function(){switchTab("profile");};
   } else {
-    box.innerHTML=`<div id="gbtn"></div><button class="btn ghost sm" id="guest">Continue as guest</button>`;
-    document.getElementById("guest").onclick=()=>{if(!isGuest()){META_DB.account={email:"guest-"+uid(),name:"Guest",guest:true};saveMeta();}boot();};
+    box.innerHTML='<div id="gbtn"></div><button class="btn ghost sm" id="guest">Continue as guest</button>';
+    document.getElementById("guest").onclick=function(){if(!isGuest()){META_DB.account={email:"guest-"+uid(),name:"Guest",guest:true};saveMeta();}boot();};
     renderGoogle();
   }
 }
@@ -1232,16 +1296,19 @@ function renderGoals(){
 }
 function renderTargets(){const c=calc();kBmr.textContent=c.bmr;kTdee.textContent=c.tdee;kTarget.textContent=c.target;return c;}
 function renderEnergy(c){
-  const d=day(),t=dayTotals(d);
-  const eff=effTarget(c);
-  calEaten.textContent=Math.round(t.cal);calGoal.textContent=eff;
-  const rem=eff-t.cal;calRem.textContent=rem>=0?rem+" left":Math.abs(rem)+" over";
-  calRem.style.color=rem>=0?"var(--accent)":"var(--bad)";
-  ringFg.setAttribute("stroke-dashoffset",452-452*Math.min(1,t.cal/eff||0));
-  const set=(nv,gv,bar,nid,gid)=>{document.getElementById(nid).textContent=Math.round(nv);document.getElementById(gid).textContent=gv;document.getElementById(bar).style.width=Math.min(100,nv/gv*100||0)+"%";};
-  set(t.pro,c.proG,"pBar","pNow","pGoal");set(t.carb,c.carbG,"cBar","cNow","cGoal");set(t.fat,c.fatG,"fBar","fNow","fGoal");
-  mealCount.textContent=d.meals.length;
-  proPerMeal.textContent=d.meals.length?Math.round(t.pro/d.meals.length)+"g":"—";
+  const d=day(),t=dayTotals(d),eff=effTarget(c);
+  const cal=Math.round(t.cal),rem=eff-t.cal;
+  const $=function(id){return document.getElementById(id);};
+  if($("calEaten"))$("calEaten").textContent=cal;
+  if($("calGoal"))$("calGoal").textContent=eff;
+  if($("calPct"))$("calPct").textContent=Math.round(Math.min(100,t.cal/eff*100||0))+"%";
+  if($("calLeftBadge"))$("calLeftBadge").textContent=rem>=0?(rem+" kcal left"):(Math.abs(rem)+" kcal over");
+  if($("calNote"))$("calNote").textContent="Target tuned to your "+((GOALS[DB.profile.goal]||GOALS.maintain).t.toLowerCase())+" goal.";
+  if($("ringFg"))$("ringFg").setAttribute("stroke-dashoffset",(390-390*Math.min(1,t.cal/eff||0)).toFixed(1));
+  const mac=function(nv,gv,bar,nid){if($(nid))$(nid).textContent=Math.round(nv);if($(bar))$(bar).style.width=Math.min(100,nv/gv*100||0)+"%";};
+  mac(t.pro,c.proG,"pBar","pNow");mac(t.carb,c.carbG,"cBar","cNow");mac(t.fat,c.fatG,"fBar","fNow");
+  if($("mealCount"))$("mealCount").textContent=d.meals.length;
+  if($("proPerMeal"))$("proPerMeal").textContent=d.meals.length?Math.round(t.pro/d.meals.length)+"g":"—";
 }
 function renderMeals(){
   const d=day(),b=document.getElementById("mealBody");b.innerHTML="";let tc=0,tp=0,tca=0,tf=0;
@@ -1417,12 +1484,12 @@ async function sendChat(){
 function winData(){
   const c=calc(),d=day(),t=dayTotals(d),wt=(DB.water.target||waterTarget()),eff=effTarget(c),a=d.activity||{};
   return [
-    {k:"Logged",ic:"🍽️",ok:d.meals.length>0},
-    {k:"Protein",ic:"💪",ok:t.pro>=c.proG*0.9},
-    {k:"Calories",ic:"🔥",ok:t.cal>0&&t.cal<=eff*1.05},
-    {k:"Water",ic:"💧",ok:wt>0&&d.water>=wt},
-    {k:"Active",ic:"🏃",ok:(+a.steps||0)>=8000||(+a.activeKcal||0)>0},
-    {k:"Habits",ic:"✅",ok:DB.habitDefs.length>0&&DB.habitDefs.every(n=>d.habits[n])}
+    {k:"Logged",ic:"🍽️",ok:d.meals.length>0,v:d.meals.length+""},
+    {k:"Protein",ic:"💪",ok:t.pro>=c.proG*0.9,v:Math.round(t.pro/c.proG*100||0)+"%"},
+    {k:"Calories",ic:"🔥",ok:t.cal>0&&t.cal<=eff*1.05,v:Math.round(t.cal/eff*100||0)+"%"},
+    {k:"Water",ic:"💧",ok:wt>0&&d.water>=wt,v:Math.round(d.water/wt*100||0)+"%"},
+    {k:"Active",ic:"🏃",ok:(+a.steps||0)>=8000||(+a.activeKcal||0)>0,v:((+a.steps||0)>=1000?(Math.round((+a.steps)/100)/10)+"k":((+a.steps||0)||"—")+"")},
+    {k:"Habits",ic:"✅",ok:DB.habitDefs.length>0&&DB.habitDefs.every(n=>d.habits[n]),v:Object.values(d.habits||{}).filter(Boolean).length+"/"+DB.habitDefs.length}
   ];
 }
 function logStreak(){let s=0;const dt=new Date(curDate+"T00:00");
@@ -1431,11 +1498,13 @@ function logStreak(){let s=0;const dt=new Date(curDate+"T00:00");
 function renderWins(){const el=document.getElementById("wins");if(!el)return;
   const wins=winData(),met=wins.filter(w=>w.ok).length,pct=Math.round(met/wins.length*100);
   document.getElementById("wsPct").textContent=pct+"%";
-  const s=logStreak();
-  document.getElementById("wsStreak").textContent=s>0?("🔥 "+s+"-day logging streak"):"🌱 Log a meal to start your streak";
+  var ring=document.getElementById("winRing");if(ring)ring.setAttribute("stroke-dashoffset",(308-308*pct/100).toFixed(1));
+  document.getElementById("wsStreak").innerHTML="You're <b>"+pct+"%</b> of the way to a perfect day."+(pct>=100?" 🏆":pct>=60?" Keep going.":pct>=20?" Nice start.":"");
   const bb=document.getElementById("wsBadges");bb.innerHTML="";
-  wins.forEach(w=>{const b=document.createElement("span");b.className="wbadge"+(w.ok?" on":"");b.textContent=w.ic+" "+w.k;bb.appendChild(b);});
-  document.getElementById("wsMsg").textContent=pct>=100?"Perfect day — you crushed every goal! 🏆":pct>=60?"You're winning today — keep the momentum going.":pct>=20?"Good start — a couple more wins within reach.":"Every log is a win. Add your first to get rolling.";
+  wins.forEach(function(w){var b=document.createElement("span");b.className="wbadge"+(w.ok?" on":"");
+    b.innerHTML=(w.ok?'<span class="wck">✓</span>':'<span>'+w.ic+'</span>')+' '+w.k+' <span class="wv">'+w.v+'</span>';bb.appendChild(b);});
+  const s=logStreak();
+  document.getElementById("wsMsg").textContent=s>0?("🔥 "+s+"-day logging streak"):"🌱 Log a meal to start your streak";
 }
 const DEVICES=[
   {id:"apple",name:"Apple Watch · Health",ic:"⌚",method:"via Apple Health (iOS)",syncs:"Steps · Active kcal · Heart rate · Sleep · Workouts"},
@@ -1717,6 +1786,7 @@ function bindEvents(){
   var tn=document.getElementById("testNotif");if(tn)tn.onclick=function(){if(notifPerm()!=="granted"){enableNotifications();return;}showNotif("🔔 NutriBoard","Test notification — your reminders are working!","test");toast("Test sent");};
   var sl=document.getElementById("saveLocBtn");if(sl)sl.onclick=function(){DB.profile.country=setCountry.value.trim();DB.profile.city=setCity.value.trim();save();fetchWeather();};
   var ng=document.getElementById("newGuestBtn");if(ng)ng.onclick=newGuest;
+  var so=document.getElementById("signoutBtn2");if(so)so.onclick=function(){if(confirm("Sign out of NutriBoard on this device?")){delete META_DB.account;saveMeta();location.reload();}};
   var eb=document.getElementById("exportBtn");if(eb)eb.onclick=exportData;
   var db2=document.getElementById("deleteBtn");if(db2)db2.onclick=deleteMyData;
   var qm=document.getElementById("qMeal");if(qm)qm.onclick=function(){var i=document.getElementById("mName");if(i){i.scrollIntoView({behavior:"smooth",block:"center"});i.focus();}};
