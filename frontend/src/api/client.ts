@@ -28,6 +28,8 @@ export const api = {
     req<{ token: string; user: User }>('/auth/register', { method: 'POST', body: JSON.stringify({ email, password, name }) }),
   login: (email: string, password: string) =>
     req<{ token: string; user: User }>('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
+  loginWithGoogle: (idToken: string) =>
+    req<{ token: string; user: User }>('/auth/google', { method: 'POST', body: JSON.stringify({ idToken }) }),
   me: () => req<User>('/auth/me'),
 
   getProfile: () => req<Profile>('/profile'),
