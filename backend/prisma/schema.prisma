@@ -170,6 +170,42 @@ model Habit {
 }
 
 model HabitLog {
+  id      String  @id @default(cuid())
+  userId  String
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habitId String
+  habit   Habit   @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  date    String
+  done    Boolean @default(false)
+
+  @@unique([habitId, date])
+  @@index([userId, date])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String   // "user" | "coach"
+  text      String
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+// Audit trail — every edit to changeable data is timestamped here
+model ChangeHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  field     String
+  fromValue String
+  toValue   String
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+// NutriBoard data model
 generator client {
   provider = "prisma-client-js"
 }
