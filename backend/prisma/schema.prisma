@@ -33,6 +33,7 @@ model User {
   name         String?
   passwordHash String?
   googleId     String?  @unique
+  lastLoginAt  DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
