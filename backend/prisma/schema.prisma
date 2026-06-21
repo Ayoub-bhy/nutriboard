@@ -33,17 +33,59 @@ model User {
   name         String?
   passwordHash String?
   googleId     String?  @unique
+  lastLoginAt  DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  profile      Profile?
-  meals        Meal[]
-  waterLogs    WaterLog[]
-  weightLogs   WeightLog[]
-  habits       Habit[]
-  habitLogs    HabitLog[]
-  chatMessages ChatMessage[]
-  changes      ChangeHistory[]
+  profile         Profile?
+  meals           Meal[]
+  waterLogs       WaterLog[]
+  weightLogs      WeightLog[]
+  habits          Habit[]
+  habitLogs       HabitLog[]
+  chatMessages    ChatMessage[]
+  changes         ChangeHistory[]
+  integrations    Integration[]
+  importedMetrics ImportedMetric[]
+}
+
+// Device/wearable OAuth connections (Fitbit, Strava, Garmin, Google Fit).
+// Tokens are encrypted at rest by integration.service before persistence.
+model Integration {
+  id             String    @id @default(cuid())
+  userId         String
+  provider       String
+  accessToken    String
+  refreshToken   String?
+  expiresAt      DateTime?
+  scope          String    @default("")
+  externalUserId String?
+  lastSyncAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+}
+
+// Daily activity metrics pulled from a connected provider.
+model ImportedMetric {
+  id           String   @id @default(cuid())
+  userId       String
+  provider     String
+  date         String
+  steps        Int      @default(0)
+  activeKcal   Int      @default(0)
+  restingHr    Int?
+  sleepMinutes Int?
+  distanceM    Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider, date])
 }
 
 model Profile {

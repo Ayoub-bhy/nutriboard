@@ -25,6 +25,10 @@ export const login = async (req: Request, res: Response) => {
   const { email, password } = loginSchema.parse(req.body);
   res.json(await authSvc.login(email, password));
 };
+export const google = async (req: Request, res: Response) => {
+  const idToken = String((req.body ?? {}).idToken ?? '');
+  res.json(await authSvc.loginWithGoogle(idToken));
+};
 export const me = async (req: Request, res: Response) => res.json(await authSvc.me(uid(req)));
 
 // --- profile ---

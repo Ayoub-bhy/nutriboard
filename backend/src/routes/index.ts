@@ -9,6 +9,7 @@ const router = Router();
 // Public auth routes
 router.post('/auth/register', h(c.register));
 router.post('/auth/login', h(c.login));
+router.post('/auth/google', h(c.google));
 
 // Everything below requires a valid JWT
 router.use(requireAuth);
