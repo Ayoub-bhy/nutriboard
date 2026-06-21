@@ -1,28 +1,7 @@
 import { computeTargets, type Goal, type Sex } from '../utils/nutrition.js';
 import { dayTotals } from './meal.service.js';
 import { prisma } from '../lib/prisma.js';
-
-interface Food { n: string; cal: number; p: number; c: number; f: number; type: string; tags: string[]; }
-
-const FOODS: Food[] = [
-  { n: 'Greek yogurt + berries + honey', cal: 240, p: 22, c: 28, f: 4, type: 'Breakfast', tags: ['vegetarian', 'mediterranean'] },
-  { n: '3-egg veggie omelette', cal: 320, p: 24, c: 6, f: 22, type: 'Breakfast', tags: ['vegetarian', 'keto', 'halal'] },
-  { n: 'Oats, whey & banana', cal: 380, p: 30, c: 50, f: 8, type: 'Breakfast', tags: ['vegetarian'] },
-  { n: 'Tofu scramble + avocado toast', cal: 400, p: 22, c: 38, f: 18, type: 'Breakfast', tags: ['vegan', 'vegetarian'] },
-  { n: 'Grilled chicken, rice & broccoli', cal: 520, p: 45, c: 55, f: 12, type: 'Lunch', tags: ['halal', 'mediterranean'] },
-  { n: 'Salmon, quinoa & greens', cal: 560, p: 40, c: 42, f: 24, type: 'Lunch', tags: ['pescatarian', 'mediterranean'] },
-  { n: 'Lentil & chickpea bowl', cal: 480, p: 24, c: 70, f: 10, type: 'Lunch', tags: ['vegan', 'vegetarian'] },
-  { n: 'Turkey & hummus wrap', cal: 430, p: 34, c: 40, f: 14, type: 'Lunch', tags: ['halal', 'mediterranean'] },
-  { n: 'Beef stir-fry & veg', cal: 540, p: 42, c: 30, f: 26, type: 'Dinner', tags: ['halal', 'keto'] },
-  { n: 'Baked cod, potatoes & salad', cal: 500, p: 42, c: 48, f: 14, type: 'Dinner', tags: ['pescatarian', 'mediterranean'] },
-  { n: 'Tempeh curry & brown rice', cal: 520, p: 28, c: 62, f: 16, type: 'Dinner', tags: ['vegan', 'vegetarian'] },
-  { n: 'Steak, sweet potato & asparagus', cal: 580, p: 46, c: 40, f: 24, type: 'Dinner', tags: ['halal', 'keto'] },
-  { n: 'Cottage cheese & pineapple', cal: 180, p: 24, c: 14, f: 2, type: 'Snack', tags: ['vegetarian'] },
-  { n: 'Apple & peanut butter', cal: 230, p: 7, c: 28, f: 11, type: 'Snack', tags: ['vegan', 'vegetarian'] },
-  { n: 'Protein shake & almonds', cal: 260, p: 30, c: 10, f: 12, type: 'Snack', tags: ['vegetarian', 'keto'] },
-  { n: 'Edamame & sea salt', cal: 190, p: 18, c: 15, f: 8, type: 'Snack', tags: ['vegan', 'vegetarian'] },
-  { n: 'Hard-boiled eggs & cucumber', cal: 160, p: 13, c: 3, f: 10, type: 'Snack', tags: ['vegetarian', 'keto', 'halal'] },
-];
+import { FOODS, type Food } from '../utils/foods.js';
 
 export async function suggestMeals(userId: string, date: string) {
   const profile = await prisma.profile.findUnique({ where: { userId } });
