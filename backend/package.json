@@ -10,13 +10,13 @@
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**/*.ts\"",
-    "test": "node --experimental-strip-types --test \"tests/**/*.test.ts\"",
-    "test:watch": "node --experimental-strip-types --test --watch \"tests/**/*.test.ts\"",
+    "test": "node --import tsx --test \"tests/**/*.test.ts\"",
+    "test:watch": "node --import tsx --test --watch \"tests/**/*.test.ts\"",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
-    "test:coverage": "node --experimental-strip-types --test --experimental-test-coverage \"tests/**/*.test.ts\""
+    "test:coverage": "node --import tsx --test --experimental-test-coverage \"tests/**/*.test.ts\""
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
